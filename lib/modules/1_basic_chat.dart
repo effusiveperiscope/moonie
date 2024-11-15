@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/openrouter.dart';
+import 'package:provider/provider.dart';
 
 class BasicChatController extends ChangeNotifier {
   final OpenRouterInterface ori;
-  List<Map<String, dynamic>> messages = [];
+  List<(ChatMessageType, String)> messages = [];
+  bool _busy = false;
+
+  bool get busy => _busy;
+  set busy(bool value) {
+    _busy = value;
+    notifyListeners();
+  }
 
   BasicChatController(this.ori);
 
@@ -12,50 +20,144 @@ class BasicChatController extends ChangeNotifier {
     return ori.completions() != null;
   }
 
+  void clear() {
+    messages.clear();
+    notifyListeners();
+  }
+
   void sendMessage(String message) async {
-    final prompt = PromptTemplate.fromTemplate('{message}');
+    busy = true;
+    final prompt = ChatPromptTemplate.fromTemplates(
+      [
+        (ChatMessageType.system, 'You are a helpful assistant.'),
+        ...messages,
+        (ChatMessageType.human, '{message}'),
+      ],
+    );
     final openai = ori.completions()!;
     final chain = prompt | openai | const StringOutputParser();
+    messages.add((ChatMessageType.human, message));
+    notifyListeners();
     final res = await chain.invoke({'message': message});
-    print(res);
+    messages.add((ChatMessageType.ai, res as String));
+    busy = false;
+    notifyListeners();
   }
 }
 
-class BasicInputWidget extends StatefulWidget {
-  const BasicInputWidget({
-    super.key,
-  });
+class BasicChatWidget extends StatefulWidget {
+  final OpenRouterInterface openRouterInterface;
+  const BasicChatWidget({super.key, required this.openRouterInterface});
 
   @override
-  State<BasicInputWidget> createState() => _BasicInputWidgetState();
+  State<BasicChatWidget> createState() => _BasicChatWidgetState();
 }
 
-class _BasicInputWidgetState extends State<BasicInputWidget> {
+class _BasicChatWidgetState extends State<BasicChatWidget> {
   TextEditingController textController =
-      TextEditingController(text: 'Hello World');
+      TextEditingController(text: 'Hello, this is a test.');
+  late final BasicChatController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = BasicChatController(widget.openRouterInterface);
+  }
+
+  String chatMessageTypeToName(ChatMessageType type) {
+    switch (type) {
+      case ChatMessageType.ai:
+        return 'AI';
+      case ChatMessageType.human:
+        return 'You';
+      case ChatMessageType.system:
+        return 'System';
+      default:
+        return 'Unknown';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Expanded(
-            child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text("Hi")],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return ChangeNotifierProvider.value(
+      value: controller,
+      child:
+          Consumer<BasicChatController>(builder: (context, controller, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final message in controller.messages)
+                        Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(chatMessageTypeToName(message.$1),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        )),
+                                    Text(message.$2),
+                                  ],
+                                ),
+                              ),
+                            )),
+                    ]),
+              ),
             ),
-          ),
-        )),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: textController,
-          ),
-        )
-      ],
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainer,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: textController,
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(), isDense: true),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    IconButton.outlined(
+                      onPressed: () {
+                        controller.clear();
+                      },
+                      icon: const Icon(Icons.restart_alt),
+                    ),
+                    const SizedBox(width: 8.0),
+                    IconButton.outlined(
+                        onPressed: controller.canSend()
+                            ? () {
+                                controller.sendMessage(textController.text);
+                              }
+                            : null,
+                        icon: controller.busy
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ))
+                            : const Icon(Icons.send))
+                  ],
+                ),
+              ),
+            )
+          ],
+        );
+      }),
     );
   }
 }

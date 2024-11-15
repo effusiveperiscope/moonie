@@ -4,8 +4,10 @@ import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:collection/collection.dart';
 
 class Settings extends ChangeNotifier {
+  bool _notifyListeners = true;
   String _openRouterKey = "";
   String? _currentModel;
 
@@ -34,17 +36,28 @@ class Settings extends ChangeNotifier {
   /// Read settings from storage
   static Future<Settings> read() async {
     final settings = Settings();
+    settings._notifyListeners =
+        false; // Avoid triggering redundant writes while reading
     settings.showOnlyFreeModels =
         (await storage.read(key: "showOnlyFreeModels")) == "true";
     settings.openRouterKey = await storage.read(key: "openRouterKey") ?? "";
     final currentModelValue = await storage.read(key: "currentModel");
     settings.currentModel =
         currentModelValue?.isEmpty ?? true ? null : currentModelValue;
+    settings._notifyListeners = true;
     return settings;
   }
 
+  @override
+  void notifyListeners() {
+    write();
+    if (_notifyListeners) {
+      super.notifyListeners();
+    }
+  }
+
   /// Write settings to storage
-  Future<void> write() async {
+  void write() async {
     await storage.write(
         key: "showOnlyFreeModels", value: showOnlyFreeModels.toString());
     await storage.write(key: "openRouterKey", value: openRouterKey);
@@ -141,7 +154,20 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ? e.value!.contains(':free')
                                   : true)
                               .toList();
-
+                          // If the current model is not in the list, set it to the first one
+                          if (dropdownitems.isNotEmpty &&
+                              dropdownitems.firstWhereOrNull(
+                                    (e) => e.value == settings.currentModel,
+                                  ) ==
+                                  null) {
+                            settings.currentModel = dropdownitems.first.value;
+                          }
+                          if (dropdownitems.isEmpty &&
+                              settings.currentModel != null) {
+                            dropdownitems.add(DropdownMenuItem(
+                                value: settings.currentModel,
+                                child: Text(settings.currentModel!)));
+                          }
                           return DropdownButton<String>(
                             isExpanded: true,
                             value: settings.currentModel,
@@ -195,7 +221,7 @@ class _KeyTesterState extends State<KeyTester> {
         ActionChip(
             onPressed: () async {
               widget.ori
-                  .testKey(widget._openRouterKeyController.text)
+                  .testKey(widget._openRouterKeyController.text.trim())
                   .then((data) async {
                 if (data == null) {
                   setState(() {
@@ -206,7 +232,7 @@ class _KeyTesterState extends State<KeyTester> {
                 }
                 setState(() {
                   status =
-                      "credits remaining: ${data["data"]?["limit_remaining"].toStringAsFixed(4)} (${formatDateTime1(DateTime.now())})";
+                      "credits remaining: ${widget.ori.creditsRemaining?.toStringAsFixed(4)} (${formatDateTime1(DateTime.now())})";
                   widget.settings.openRouterKey =
                       widget._openRouterKeyController.text;
                 });

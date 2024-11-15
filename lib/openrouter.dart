@@ -9,6 +9,7 @@ class OpenRouterInterface extends ChangeNotifier {
 
   final dio = Dio();
   List<String> availableModels = [];
+  double? creditsRemaining;
 
   // https://openrouter.ai/docs/quick-start
   static const String openRouterEndpoint = 'https://openrouter.ai/api/v1';
@@ -20,6 +21,7 @@ class OpenRouterInterface extends ChangeNotifier {
       availableModels.clear();
       availableModels =
           response.data['data'].map((e) => e['id']).toList().cast<String>();
+      notifyListeners();
       return availableModels;
     } catch (e) {
       return null;
@@ -32,19 +34,21 @@ class OpenRouterInterface extends ChangeNotifier {
       final response = await dio.get('https://openrouter.ai/api/v1/auth/key',
           options: Options(headers: {'Authorization': 'Bearer $key'}));
       Map<String, dynamic>? data = response.data;
+      creditsRemaining = data?['data']?['limit_remaining'];
+      notifyListeners();
       return data;
     } catch (e) {
       return null;
     }
   }
 
-  OpenAI? completions() {
+  ChatOpenAI? completions() {
     if (settings.currentModel == null) {
       return null;
     }
-    return OpenAI(
+    return ChatOpenAI(
         apiKey: settings.openRouterKey,
         baseUrl: openRouterEndpoint,
-        defaultOptions: OpenAIOptions(model: settings.currentModel));
+        defaultOptions: ChatOpenAIOptions(model: settings.currentModel));
   }
 }

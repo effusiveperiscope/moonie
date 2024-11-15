@@ -7,13 +7,16 @@ environment:
   sdk: ^3.5.4
 
 dependencies:
+  collection: ^1.18.0
   dio: ^5.7.0
   flutter:
     sdk: flutter
-  flutter_secure_storage: ^9.2.2
+  # 9.2.2 has a bug with windows - will corrupt the secure storage file
+  flutter_secure_storage: ^8.1.0
   langchain: ^0.7.7+1
   langchain_openai: ^0.7.2+5
   provider: ^6.1.2
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_test:
