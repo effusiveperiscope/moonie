@@ -154,13 +154,18 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ? e.value!.contains(':free')
                                   : true)
                               .toList();
+                          var dropdownvalue = settings.currentModel;
                           // If the current model is not in the list, set it to the first one
                           if (dropdownitems.isNotEmpty &&
                               dropdownitems.firstWhereOrNull(
                                     (e) => e.value == settings.currentModel,
                                   ) ==
                                   null) {
-                            settings.currentModel = dropdownitems.first.value;
+                            dropdownvalue = dropdownitems.first.value;
+                            // our real problem is that we're trying to perform the filtering on the ui end
+                            // when we really should do it inside ori
+                            // or we need to better understand our abstractions -
+                            // perhaps model should be stored in ori
                           }
                           if (dropdownitems.isEmpty &&
                               settings.currentModel != null) {
@@ -170,7 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           }
                           return DropdownButton<String>(
                             isExpanded: true,
-                            value: settings.currentModel,
+                            value: dropdownvalue,
                             items: dropdownitems,
                             style: const TextStyle(fontSize: 12.0),
                             onChanged: (String? value) {
