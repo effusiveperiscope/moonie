@@ -1,0 +1,24 @@
+name: moonie
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  dio: ^5.7.0
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: ^9.2.2
+  langchain: ^0.7.7+1
+  langchain_openai: ^0.7.2+5
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
