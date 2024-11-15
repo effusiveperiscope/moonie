@@ -43,6 +43,31 @@ class BasicChatController extends ChangeNotifier {
     busy = false;
     notifyListeners();
   }
+
+  void removeMessages((ChatMessageType, String) message) async {
+    int index = messages.lastIndexWhere((element) => element == message);
+    if (index == -1) {
+      return;
+    }
+    messages.removeRange(index, messages.length);
+    notifyListeners();
+  }
+
+  void retryMessage((ChatMessageType, String) lastMessage) async {
+    removeMessages(lastMessage);
+    busy = true;
+    notifyListeners();
+    final prompt = ChatPromptTemplate.fromTemplates([
+      (ChatMessageType.system, 'You are a helpful assistant.'),
+      ...messages
+    ]);
+    final openai = ori.completions()!;
+    final chain = prompt | openai | const StringOutputParser();
+    final res = await chain.invoke({});
+    messages.add((ChatMessageType.ai, res as String));
+    busy = false;
+    notifyListeners();
+  }
 }
 
 class BasicChatWidget extends StatefulWidget {
@@ -57,6 +82,7 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
   TextEditingController textController =
       TextEditingController(text: 'Hello, this is a test.');
   late final BasicChatController controller;
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -90,28 +116,73 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final message in controller.messages)
-                        Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(chatMessageTypeToName(message.$1),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                    Text(message.$2),
-                                  ],
+                child: SelectableRegion(
+                  selectionControls: MaterialTextSelectionControls(),
+                  focusNode: focusNode,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final message in controller.messages)
+                          Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                              chatMessageTypeToName(message.$1),
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12)),
+                                          const Spacer(),
+                                          SizedBox(
+                                            width: 24.0,
+                                            height: 18.0,
+                                            child: IconButton.outlined(
+                                                icon: const Icon(
+                                                    Icons.restart_alt),
+                                                iconSize: 16,
+                                                padding: EdgeInsets.zero,
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                onPressed: () {
+                                                  controller
+                                                      .retryMessage(message);
+                                                }),
+                                          ),
+                                          const SizedBox(width: 24),
+                                          SizedBox(
+                                            width: 24.0,
+                                            height: 18.0,
+                                            child: IconButton.outlined(
+                                                icon: const Icon(Icons.delete),
+                                                iconSize: 16,
+                                                padding: EdgeInsets.zero,
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                onPressed: () {
+                                                  controller
+                                                      .removeMessages(message);
+                                                }),
+                                          )
+                                        ],
+                                      ),
+                                      const Divider(),
+                                      Text(
+                                        message.$2,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )),
-                    ]),
+                              )),
+                      ]),
+                ),
               ),
             ),
             Container(
