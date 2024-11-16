@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
@@ -69,6 +70,7 @@ class Chat2Controller extends ChangeNotifier {
   List<Chat2Message> messages = [];
   bool _busy = false;
   String errorMessage = '';
+  CancelableOperation? _future;
 
   Chat2Controller(this.ori);
 
@@ -99,6 +101,10 @@ class Chat2Controller extends ChangeNotifier {
     return ori.settings.useStreamingOutputs;
   }
 
+  void interrupt() {
+    _future?.cancel();
+  }
+
   Future<void> sendMessage(Chat2Message message) async {
     busy = true;
     final openai = ori.completions()!;
@@ -113,11 +119,33 @@ class Chat2Controller extends ChangeNotifier {
         ...messages.map((e) => e.message())
       ],
     );
-    if (useStreamingOutputs()) {
-      await streamInvoke(chain, prompt);
-    } else {
-      await nonStreamInvoke(chain, prompt);
+    final res = await invoke(chain, prompt);
+    if (res == 1) {
+      errorMessage = 'Request cancelled';
+      return;
     }
+  }
+
+  Future<dynamic> invoke(Runnable chain, PromptValue prompt) async {
+    if (useStreamingOutputs()) {
+      _future = CancelableOperation.fromFuture(
+        streamInvoke(chain, prompt),
+        onCancel: () {
+          messages.removeLast();
+          return 1;
+        },
+      );
+    } else {
+      _future = CancelableOperation.fromFuture(
+        nonStreamInvoke(chain, prompt),
+        onCancel: () {
+          // Right now we can't really do much about this
+          // Because requests aren't interruptible
+          return 1;
+        },
+      );
+    }
+    return await _future!.valueOrCancellation();
   }
 
   Future<void> nonStreamInvoke(Runnable chain, PromptValue prompt) async {
@@ -167,9 +195,11 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> retryMessage(Chat2Message lastMessage) async {
+  Future<void> retryMessage(Chat2Message? lastMessage) async {
     try {
-      removeMessages(lastMessage);
+      if (lastMessage != null) {
+        removeMessages(lastMessage);
+      }
       busy = true;
       notifyListeners();
       final prompt = PromptValue.chat([
@@ -179,10 +209,10 @@ class Chat2Controller extends ChangeNotifier {
       final openai = ori.completions()!;
       final chain = openai | const StringOutputParser();
       // invoke
-      if (useStreamingOutputs()) {
-        await streamInvoke(chain, prompt);
-      } else {
-        await nonStreamInvoke(chain, prompt);
+      final res = await invoke(chain, prompt);
+      if (res == 1) {
+        errorMessage = 'Request cancelled';
+        return;
       }
       errorMessage = '';
     } catch (e) {
@@ -205,7 +235,20 @@ class _MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<_MessageWidget> {
-  TextEditingController editController = TextEditingController();
+  late final TextEditingController editController;
+  bool editMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    editController = TextEditingController(text: widget.message.text);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    editController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +269,21 @@ class _MessageWidgetState extends State<_MessageWidget> {
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
+                    SizedBox(
+                        width: 24.0,
+                        height: 18.0,
+                        child: IconButton.outlined(
+                          icon: const Icon(Icons.edit),
+                          iconSize: 16,
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            setState(() {
+                              editMode = !editMode;
+                            });
+                          },
+                        )),
+                    const SizedBox(width: 16),
                     // Should only be able to retry AI messages
                     if (message.type == ChatMessageType.ai)
                       SizedBox(
@@ -240,7 +298,7 @@ class _MessageWidgetState extends State<_MessageWidget> {
                               controller.retryMessage(message);
                             }),
                       ),
-                    const SizedBox(width: 24),
+                    const SizedBox(width: 16),
                     SizedBox(
                       width: 24.0,
                       height: 18.0,
@@ -259,16 +317,31 @@ class _MessageWidgetState extends State<_MessageWidget> {
                 Row(
                   children: [
                     Expanded(
-                      child: MarkdownBody(
-                        data: message.text,
-                        // For now we'll disable image building
-                        // Since the AI can hallucinate invalid links
-                        imageBuilder: (uri, title, alt) => const SizedBox(),
-                        styleSheet:
-                            //MarkdownStyleSheet.fromTheme(Theme.of(context)),
-                            fromThemeWithBaseFontSize(context, 12),
-                        //style: const TextStyle(fontSize: 12),
-                      ),
+                      child: Builder(builder: (context) {
+                        if (editMode) {
+                          return TextField(
+                            controller: editController,
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(), isDense: true),
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 7,
+                            minLines: 1,
+                            onChanged: (value) {
+                              message.text = value;
+                            },
+                          );
+                        }
+                        return MarkdownBody(
+                          data: message.text,
+                          // For now we'll disable image building
+                          // Since the AI can hallucinate invalid links
+                          imageBuilder: (uri, title, alt) => const SizedBox(),
+                          styleSheet:
+                              //MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                              fromThemeWithBaseFontSize(context, 12),
+                          //style: const TextStyle(fontSize: 12),
+                        );
+                      }),
                     ),
                     if (message.imageFile != null)
                       Expanded(
@@ -411,20 +484,34 @@ class _Chat2WidgetState extends State<Chat2Widget> {
 
   ChangeNotifierProvider<OpenRouterSettings> sendButton(
       Chat2Controller controller) {
+    final void Function()? invocationCallback;
+    if (controller.canSend()) {
+      if (controller.busy) {
+        invocationCallback = () {
+          controller.interrupt();
+        };
+      } else {
+        invocationCallback = () async {
+          if (textController.text.isNotEmpty) {
+            await controller.sendMessage(Chat2Message(
+                type: ChatMessageType.human,
+                text: textController.text,
+                imageFile: imageFile));
+            textController.clear();
+          } else {
+            await controller.retryMessage(null);
+          }
+        };
+      }
+    } else {
+      invocationCallback = null;
+    }
     return ChangeNotifierProvider.value(
       value: widget.openRouterInterface.settings.openRouterSettings,
       child: Consumer<OpenRouterSettings>(builder: (context, ors, _) {
         return IconButton.outlined(
             visualDensity: VisualDensity.compact,
-            onPressed: controller.canSend()
-                ? () async {
-                    await controller.sendMessage(Chat2Message(
-                        type: ChatMessageType.human,
-                        text: textController.text,
-                        imageFile: imageFile));
-                    textController.clear();
-                  }
-                : null,
+            onPressed: invocationCallback,
             icon: controller.busy
                 ? const SizedBox(
                     width: 12,
