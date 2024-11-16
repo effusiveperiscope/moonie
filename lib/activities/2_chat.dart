@@ -13,12 +13,15 @@ import 'package:provider/provider.dart';
 class Chat2Message {
   ChatMessageType type;
   String text;
+  bool complete = false;
+
   String? model;
   String? imageFile;
   String? imageBase64;
 
   Chat2Message(
-      {this.type = ChatMessageType.human, required this.text, this.imageFile}) {
+      {this.type = ChatMessageType.human, required String text, this.imageFile})
+      : text = text {
     prepareImage();
   }
 
@@ -153,6 +156,7 @@ class Chat2Controller extends ChangeNotifier {
       final res = await chain.invoke(prompt);
       final mes = Chat2Message(type: ChatMessageType.ai, text: res as String);
       mes.model = ori.currentModel();
+      mes.complete = true;
       messages.add(mes);
       notifyListeners();
     } catch (e) {
@@ -165,10 +169,11 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   Future<void> streamInvoke(Runnable chain, PromptValue prompt) async {
+    final mes = Chat2Message(type: ChatMessageType.ai, text: '');
     try {
       busy = true;
-      final mes = Chat2Message(type: ChatMessageType.ai, text: '');
       mes.model = ori.currentModel();
+      mes.complete = false;
       messages.add(mes);
       notifyListeners();
       final stream = chain.stream(prompt);
@@ -181,6 +186,7 @@ class Chat2Controller extends ChangeNotifier {
       errorMessage = e.toString();
       notifyListeners();
     } finally {
+      mes.complete = true;
       ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
       busy = false;
     }
@@ -235,13 +241,12 @@ class _MessageWidget extends StatefulWidget {
 }
 
 class _MessageWidgetState extends State<_MessageWidget> {
-  late final TextEditingController editController;
+  late TextEditingController editController = TextEditingController();
   bool editMode = false;
 
   @override
   void initState() {
     super.initState();
-    editController = TextEditingController(text: widget.message.text);
   }
 
   @override
@@ -277,11 +282,18 @@ class _MessageWidgetState extends State<_MessageWidget> {
                           iconSize: 16,
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
-                          onPressed: () {
-                            setState(() {
-                              editMode = !editMode;
-                            });
-                          },
+                          // Only allow editing complete messages
+                          onPressed: message.complete
+                              ? () {
+                                  setState(() {
+                                    editMode = !editMode;
+                                    if (editMode == true) {
+                                      editController.text = message.text;
+                                      print(editController.text);
+                                    }
+                                  });
+                                }
+                              : null,
                         )),
                     const SizedBox(width: 16),
                     // Should only be able to retry AI messages
@@ -324,7 +336,7 @@ class _MessageWidgetState extends State<_MessageWidget> {
                             decoration: const InputDecoration(
                                 border: OutlineInputBorder(), isDense: true),
                             style: const TextStyle(fontSize: 12),
-                            maxLines: 7,
+                            maxLines: null,
                             minLines: 1,
                             onChanged: (value) {
                               message.text = value;
@@ -493,10 +505,12 @@ class _Chat2WidgetState extends State<Chat2Widget> {
       } else {
         invocationCallback = () async {
           if (textController.text.isNotEmpty) {
-            await controller.sendMessage(Chat2Message(
+            final mes = Chat2Message(
                 type: ChatMessageType.human,
                 text: textController.text,
-                imageFile: imageFile));
+                imageFile: imageFile);
+            mes.complete = true;
+            await controller.sendMessage(mes);
             textController.clear();
           } else {
             await controller.retryMessage(null);
