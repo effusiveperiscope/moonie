@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat.dart';
+import 'package:moonie/activity_directory.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
@@ -40,32 +41,7 @@ class MainApp extends StatelessWidget {
                 const Text("moonie"),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider.value(
-                          value: core.settings.openRouterSettings,
-                        ),
-                        ChangeNotifierProvider.value(
-                          value: core.openRouterInterface,
-                        ),
-                      ],
-                      child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
-                          builder: (context, settings, interface, _) {
-                        TextStyle style = const TextStyle(fontSize: 10.0);
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'model: ${settings.currentModel}',
-                              style: style,
-                            ),
-                            Text(
-                                'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(6)}',
-                                style: style)
-                          ],
-                        );
-                      })),
+                  child: OpenRouterInfo(core: core),
                 )
               ],
             ),
@@ -84,7 +60,7 @@ class MainApp extends StatelessWidget {
               const SizedBox(width: 16.0),
             ],
           ),
-          body: Chat2Widget(openRouterInterface: core.openRouterInterface),
+          body: ActivityDirectory(core: core),
         );
       }),
     );

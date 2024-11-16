@@ -6,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
+import 'package:moonie/activities/activity.dart';
+import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
@@ -370,9 +372,15 @@ class _MessageWidgetState extends State<_MessageWidget> {
   }
 }
 
-class Chat2Widget extends StatefulWidget {
-  final OpenRouterInterface openRouterInterface;
-  const Chat2Widget({super.key, required this.openRouterInterface});
+class Chat2Widget extends ActivityWidget {
+  late final OpenRouterInterface openRouterInterface;
+  Chat2Widget({super.key, required MoonieCore core})
+      : super(
+            name: "Chat 2",
+            description: "Chat with retries, images, streaming, etc.",
+            core: core) {
+    openRouterInterface = core.openRouterInterface;
+  }
 
   @override
   State<Chat2Widget> createState() => _Chat2WidgetState();
