@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 
 class Settings extends ChangeNotifier {
   bool _notifyListeners = true;
+  bool _useStreamingOutputs = true;
 
   static const storage = FlutterSecureStorage();
 
@@ -30,8 +31,16 @@ class Settings extends ChangeNotifier {
       settings.openRouterSettings =
           OpenRouterSettings.fromJson(json.decode(readOpenRouterSettings));
     }
+    settings._useStreamingOutputs =
+        await storage.read(key: "useStreamingOutputs") == "true";
     settings._notifyListeners = true;
     return settings;
+  }
+
+  bool get useStreamingOutputs => _useStreamingOutputs;
+  set useStreamingOutputs(bool value) {
+    _useStreamingOutputs = value;
+    notifyListeners();
   }
 
   @override
@@ -47,6 +56,8 @@ class Settings extends ChangeNotifier {
     await storage.write(
         key: "openRouterSettings",
         value: json.encode(openRouterSettings.toJson()));
+    await storage.write(
+        key: "useStreamingOutputs", value: _useStreamingOutputs.toString());
   }
 }
 
@@ -160,6 +171,21 @@ class _SettingsPageState extends State<SettingsPage> {
                           );
                         })),
                   ),
+                ],
+              ),
+              const Divider(),
+              Row(
+                children: [
+                  const Text('Use streaming outputs'),
+                  const Spacer(),
+                  Checkbox(
+                    value: settings.useStreamingOutputs,
+                    onChanged: (value) {
+                      setState(() {
+                        settings.useStreamingOutputs = value!;
+                      });
+                    },
+                  )
                 ],
               )
             ],
