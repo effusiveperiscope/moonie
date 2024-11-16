@@ -58,6 +58,10 @@ class OpenRouterInterface extends ChangeNotifier {
   // https://openrouter.ai/docs/quick-start
   static const String openRouterEndpoint = 'https://openrouter.ai/api/v1';
 
+  String? currentModel() {
+    return settings.openRouterSettings.currentModel;
+  }
+
   // https://openrouter.ai/docs/models
   Future<List<String>?> fetchModels() async {
     try {
