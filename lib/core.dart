@@ -10,8 +10,9 @@ class MoonieCore extends ChangeNotifier {
     MoonieCore core = MoonieCore();
     core.settings = await Settings.read();
     core.openRouterInterface = OpenRouterInterface(core.settings);
-    if (core.settings.openRouterKey.isNotEmpty) {
-      core.openRouterInterface.testKey(core.settings.openRouterKey);
+    final ors = core.settings.openRouterSettings;
+    if (ors.openRouterKey != null) {
+      core.openRouterInterface.testKey(ors.openRouterKey!);
     }
     return core;
   }

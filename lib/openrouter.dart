@@ -1,10 +1,54 @@
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/settings.dart';
 
+class OpenRouterSettings extends ChangeNotifier {
+  Settings? settings;
+  OpenRouterSettings(this.settings);
+
+  String? _openRouterKey;
+  String? _currentModel;
+  bool _showOnlyFreeModels = true;
+
+  bool get showOnlyFreeModels => _showOnlyFreeModels;
+  set showOnlyFreeModels(bool value) {
+    _showOnlyFreeModels = value;
+    notifyListeners();
+  }
+
+  String? get openRouterKey => _openRouterKey;
+  set openRouterKey(String? value) {
+    _openRouterKey = value;
+    notifyListeners();
+  }
+
+  String? get currentModel => _currentModel;
+  set currentModel(String? value) {
+    _currentModel = value;
+    notifyListeners();
+  }
+
+  @override
+  void notifyListeners() {
+    super.notifyListeners();
+    settings?.notifyListeners();
+  }
+
+  Map<String, dynamic> toJson() => {
+        'openRouterKey': _openRouterKey,
+        'currentModel': _currentModel,
+      };
+
+  factory OpenRouterSettings.fromJson(Map<String, dynamic> json) =>
+      OpenRouterSettings(null)
+        .._openRouterKey = json['openRouterKey']
+        .._currentModel = json['currentModel'];
+}
+
 class OpenRouterInterface extends ChangeNotifier {
-  final Settings settings;
+  Settings settings;
   OpenRouterInterface(this.settings);
 
   final dio = Dio();
@@ -22,10 +66,28 @@ class OpenRouterInterface extends ChangeNotifier {
       availableModels =
           response.data['data'].map((e) => e['id']).toList().cast<String>();
       notifyListeners();
+      // If the current model is not available, set it to the first available model
+      if (!availableModels.contains(settings.openRouterSettings.currentModel)) {
+        settings.openRouterSettings.currentModel = availableModels.first;
+        // if showOnlyfreeMOdels is enabled prefer a free model
+        if (settings.openRouterSettings.showOnlyFreeModels) {
+          final firstFree =
+              availableModels.firstWhereOrNull((e) => e.contains(':free'));
+          settings.openRouterSettings.currentModel = firstFree;
+        }
+      }
       return availableModels;
     } catch (e) {
       return null;
     }
+  }
+
+  List<String> getModels() {
+    List<String> models = availableModels;
+    if (settings.openRouterSettings.showOnlyFreeModels) {
+      models = models.where((e) => e.contains(':free')).toList();
+    }
+    return models;
   }
 
   // https://openrouter.ai/docs/limits
@@ -43,12 +105,13 @@ class OpenRouterInterface extends ChangeNotifier {
   }
 
   ChatOpenAI? completions() {
-    if (settings.currentModel == null) {
+    final orSettings = settings.openRouterSettings;
+    if (orSettings.currentModel == null) {
       return null;
     }
     return ChatOpenAI(
-        apiKey: settings.openRouterKey,
+        apiKey: orSettings.openRouterKey,
         baseUrl: openRouterEndpoint,
-        defaultOptions: ChatOpenAIOptions(model: settings.currentModel));
+        defaultOptions: ChatOpenAIOptions(model: orSettings.currentModel));
   }
 }

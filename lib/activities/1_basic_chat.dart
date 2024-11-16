@@ -208,20 +208,27 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
                       icon: const Icon(Icons.restart_alt),
                     ),
                     const SizedBox(width: 8.0),
-                    IconButton.outlined(
-                        onPressed: controller.canSend()
-                            ? () {
-                                controller.sendMessage(textController.text);
-                              }
-                            : null,
-                        icon: controller.busy
-                            ? const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ))
-                            : const Icon(Icons.send))
+                    ChangeNotifierProvider.value(
+                      value: widget
+                          .openRouterInterface.settings.openRouterSettings,
+                      child: Consumer<OpenRouterSettings>(
+                          builder: (context, ors, _) {
+                        return IconButton.outlined(
+                            onPressed: controller.canSend()
+                                ? () {
+                                    controller.sendMessage(textController.text);
+                                  }
+                                : null,
+                            icon: controller.busy
+                                ? const SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ))
+                                : const Icon(Icons.send));
+                      }),
+                    )
                   ],
                 ),
               ),

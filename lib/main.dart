@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:moonie/modules/1_basic_chat.dart';
+import 'package:moonie/activities/1_basic_chat.dart';
 import 'package:moonie/core.dart';
+import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -38,20 +39,28 @@ class MainApp extends StatelessWidget {
               children: [
                 const Text("moonie"),
                 const Spacer(),
-                ChangeNotifierProvider.value(
-                    value: core.settings,
-                    child: Consumer<Settings>(builder: (context, settings, _) {
+                MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider.value(
+                        value: core.settings.openRouterSettings,
+                      ),
+                      ChangeNotifierProvider.value(
+                        value: core.openRouterInterface,
+                      ),
+                    ],
+                    child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
+                        builder: (context, settings, interface, _) {
                       TextStyle style = const TextStyle(fontSize: 10.0);
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'model: ${core.settings.currentModel}',
+                            'model: ${settings.currentModel}',
                             style: style,
                           ),
                           Text(
-                              'credits remaining: ${core.openRouterInterface.creditsRemaining?.toStringAsFixed(4)}',
+                              'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(4)}',
                               style: style)
                         ],
                       );

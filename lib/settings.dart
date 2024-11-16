@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:moonie/core.dart';
@@ -8,42 +10,26 @@ import 'package:collection/collection.dart';
 
 class Settings extends ChangeNotifier {
   bool _notifyListeners = true;
-  String _openRouterKey = "";
-  String? _currentModel;
-
-  String? get currentModel => _currentModel;
-  set currentModel(String? value) {
-    _currentModel = value;
-    notifyListeners();
-  }
-
-  bool _showOnlyFreeModels = true;
-
-  bool get showOnlyFreeModels => _showOnlyFreeModels;
-  set showOnlyFreeModels(bool value) {
-    _showOnlyFreeModels = value;
-    notifyListeners();
-  }
-
-  String get openRouterKey => _openRouterKey;
-  set openRouterKey(String value) {
-    _openRouterKey = value;
-    notifyListeners();
-  }
 
   static const storage = FlutterSecureStorage();
+
+  late OpenRouterSettings openRouterSettings;
+
+  Settings() {
+    openRouterSettings = OpenRouterSettings(this);
+  }
 
   /// Read settings from storage
   static Future<Settings> read() async {
     final settings = Settings();
     settings._notifyListeners =
         false; // Avoid triggering redundant writes while reading
-    settings.showOnlyFreeModels =
-        (await storage.read(key: "showOnlyFreeModels")) == "true";
-    settings.openRouterKey = await storage.read(key: "openRouterKey") ?? "";
-    final currentModelValue = await storage.read(key: "currentModel");
-    settings.currentModel =
-        currentModelValue?.isEmpty ?? true ? null : currentModelValue;
+    final readOpenRouterSettings =
+        await storage.read(key: "openRouterSettings");
+    if (readOpenRouterSettings != null) {
+      settings.openRouterSettings =
+          OpenRouterSettings.fromJson(json.decode(readOpenRouterSettings));
+    }
     settings._notifyListeners = true;
     return settings;
   }
@@ -59,9 +45,8 @@ class Settings extends ChangeNotifier {
   /// Write settings to storage
   void write() async {
     await storage.write(
-        key: "showOnlyFreeModels", value: showOnlyFreeModels.toString());
-    await storage.write(key: "openRouterKey", value: openRouterKey);
-    await storage.write(key: "currentModel", value: currentModel ?? "");
+        key: "openRouterSettings",
+        value: json.encode(openRouterSettings.toJson()));
   }
 }
 
@@ -79,8 +64,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _openRouterKeyController =
-        TextEditingController(text: widget.settings.openRouterKey);
+    _openRouterKeyController = TextEditingController(
+        text: widget.settings.openRouterSettings.openRouterKey);
   }
 
   @override
@@ -94,6 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final core = Provider.of<MoonieCore>(context, listen: false);
     final settings = core.settings;
     final ori = core.openRouterInterface;
+    final OpenRouterSettings ors = settings.openRouterSettings;
     return Scaffold(
         appBar: AppBar(
           title: const Text("settings"),
@@ -130,10 +116,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 const Text("show only free models"),
                 const Spacer(),
                 Checkbox(
-                    value: settings.showOnlyFreeModels,
+                    value: ors.showOnlyFreeModels,
                     onChanged: (value) {
                       setState(() {
-                        settings.showOnlyFreeModels = value!;
+                        ors.showOnlyFreeModels = value!;
                       });
                     })
               ]),
@@ -147,31 +133,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         value: ori,
                         child: Consumer<OpenRouterInterface>(
                             builder: (context, value, child) {
-                          final dropdownitems = value.availableModels
+                          final dropdownitems = value
+                              .getModels()
                               .map((e) =>
                                   DropdownMenuItem(value: e, child: Text(e)))
-                              .where((e) => settings.showOnlyFreeModels
-                                  ? e.value!.contains(':free')
-                                  : true)
                               .toList();
-                          var dropdownvalue = settings.currentModel;
-                          // If the current model is not in the list, set it to the first one
-                          if (dropdownitems.isNotEmpty &&
+                          var dropdownvalue = ors.currentModel;
+                          if (dropdownvalue != null &&
                               dropdownitems.firstWhereOrNull(
-                                    (e) => e.value == settings.currentModel,
-                                  ) ==
+                                      (e) => e.value == dropdownvalue) ==
                                   null) {
-                            dropdownvalue = dropdownitems.first.value;
-                            // our real problem is that we're trying to perform the filtering on the ui end
-                            // when we really should do it inside ori
-                            // or we need to better understand our abstractions -
-                            // perhaps model should be stored in ori
-                          }
-                          if (dropdownitems.isEmpty &&
-                              settings.currentModel != null) {
                             dropdownitems.add(DropdownMenuItem(
-                                value: settings.currentModel,
-                                child: Text(settings.currentModel!)));
+                                value: dropdownvalue,
+                                child: Text(dropdownvalue!)));
                           }
                           return DropdownButton<String>(
                             isExpanded: true,
@@ -180,7 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             style: const TextStyle(fontSize: 12.0),
                             onChanged: (String? value) {
                               setState(() {
-                                core.settings.currentModel = value!;
+                                ors.currentModel = value!;
                               });
                             },
                           );
@@ -214,6 +188,7 @@ class _KeyTesterState extends State<KeyTester> {
   String status = "";
   @override
   Widget build(BuildContext context) {
+    final ors = widget.settings.openRouterSettings;
     return Row(
       children: [
         Text(
@@ -238,8 +213,7 @@ class _KeyTesterState extends State<KeyTester> {
                 setState(() {
                   status =
                       "credits remaining: ${widget.ori.creditsRemaining?.toStringAsFixed(4)} (${formatDateTime1(DateTime.now())})";
-                  widget.settings.openRouterKey =
-                      widget._openRouterKeyController.text;
+                  ors.openRouterKey = widget._openRouterKeyController.text;
                 });
                 final models = await widget.ori.fetchModels();
                 if (models == null) {
