@@ -250,13 +250,13 @@ class _MessageWidgetState extends State<_MessageWidget> {
                   children: [
                     Expanded(
                       child: MarkdownBody(
-                        selectable: true,
                         data: message.text,
                         // For now we'll disable image building
                         // Since the AI can hallucinate invalid links
                         imageBuilder: (uri, title, alt) => const SizedBox(),
                         styleSheet:
-                            MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                            //MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                            fromThemeWithBaseFontSize(context, 12),
                         //style: const TextStyle(fontSize: 12),
                       ),
                     ),
