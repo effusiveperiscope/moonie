@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:moonie/activities/1_basic_chat.dart';
+import 'package:moonie/activities/2_chat.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
@@ -82,7 +82,7 @@ class MainApp extends StatelessWidget {
               const SizedBox(width: 16.0),
             ],
           ),
-          body: BasicChatWidget(openRouterInterface: core.openRouterInterface),
+          body: Chat2Widget(openRouterInterface: core.openRouterInterface),
         );
       }),
     );

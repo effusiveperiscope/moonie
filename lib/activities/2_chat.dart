@@ -7,14 +7,14 @@ import 'package:moonie/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
 
-class Message {
+class Chat2Message {
   ChatMessageType type;
   String text;
   String? model;
   String? imageFile;
   String? imageBase64;
 
-  Message(
+  Chat2Message(
       {this.type = ChatMessageType.human, required this.text, this.imageFile}) {
     prepareImage();
   }
@@ -64,7 +64,7 @@ class Message {
 
 class Chat2Controller extends ChangeNotifier {
   final OpenRouterInterface ori;
-  List<Message> messages = [];
+  List<Chat2Message> messages = [];
   bool _busy = false;
   String errorMessage = '';
 
@@ -86,33 +86,42 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   // TODO this can be customizable later
-  List<Message> prefill() {
+  List<Chat2Message> prefill() {
     return [
-      Message(
+      Chat2Message(
           type: ChatMessageType.system, text: 'You are a helpful AI assistant.')
     ];
   }
 
-  void sendMessage(Message message) async {
+  bool useStreamingOutputs() {
+    return ori.settings.useStreamingOutputs;
+  }
+
+  void sendMessage(Chat2Message message) async {
     busy = true;
-    final prompt = PromptValue.chat(
-      [
-        ...prefill().map((e) => e.message()),
-        ...messages.map((e) => e.message())
-      ],
-    );
     final openai = ori.completions()!;
     final chain = openai | const StringOutputParser();
 
     messages.add(message);
     notifyListeners();
     // invoke
+    final prompt = PromptValue.chat(
+      [
+        ...prefill().map((e) => e.message()),
+        ...messages.map((e) => e.message())
+      ],
+    );
+    if (useStreamingOutputs()) {
+      streamInvoke(chain, prompt);
+    } else {
+      await nonStreamInvoke(chain, prompt);
+    }
   }
 
-  void nonStreamInvoke(Runnable chain, PromptValue prompt) async {
+  Future<void> nonStreamInvoke(Runnable chain, PromptValue prompt) async {
     try {
       final res = await chain.invoke(prompt);
-      final mes = Message(type: ChatMessageType.ai, text: res as String);
+      final mes = Chat2Message(type: ChatMessageType.ai, text: res as String);
       mes.model = ori.currentModel();
       messages.add(mes);
       notifyListeners();
@@ -128,7 +137,8 @@ class Chat2Controller extends ChangeNotifier {
   void streamInvoke(Runnable chain, PromptValue prompt) {
     try {
       busy = true;
-      final mes = Message(type: ChatMessageType.ai, text: '');
+      final mes = Chat2Message(type: ChatMessageType.ai, text: '');
+      mes.model = ori.currentModel();
       messages.add(mes);
       notifyListeners();
       final stream = chain.stream(prompt);
@@ -145,7 +155,7 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
-  void removeMessages(Message message) async {
+  void removeMessages(Chat2Message message) async {
     int index = messages.lastIndexWhere((element) => element == message);
     if (index == -1) {
       return;
@@ -154,7 +164,7 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  void retryMessage(Message lastMessage) async {
+  void retryMessage(Chat2Message lastMessage) async {
     removeMessages(lastMessage);
     busy = true;
     notifyListeners();
@@ -165,11 +175,16 @@ class Chat2Controller extends ChangeNotifier {
     final openai = ori.completions()!;
     final chain = openai | const StringOutputParser();
     // invoke
+    if (useStreamingOutputs()) {
+      streamInvoke(chain, prompt);
+    } else {
+      await nonStreamInvoke(chain, prompt);
+    }
   }
 }
 
 class _MessageWidget extends StatefulWidget {
-  final Message message;
+  final Chat2Message message;
   final Chat2Controller controller;
   const _MessageWidget({required this.message, required this.controller});
 
@@ -328,7 +343,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                         return IconButton.outlined(
                             onPressed: controller.canSend()
                                 ? () {
-                                    controller.sendMessage(Message(
+                                    controller.sendMessage(Chat2Message(
                                       type: ChatMessageType.human,
                                       text: textController.text,
                                     ));
