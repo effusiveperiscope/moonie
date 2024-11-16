@@ -7,6 +7,7 @@ class BasicChatController extends ChangeNotifier {
   final OpenRouterInterface ori;
   List<(ChatMessageType, String)> messages = [];
   bool _busy = false;
+  String errorMessage = '';
 
   bool get busy => _busy;
   set busy(bool value) {
@@ -29,7 +30,7 @@ class BasicChatController extends ChangeNotifier {
     busy = true;
     final prompt = ChatPromptTemplate.fromTemplates(
       [
-        (ChatMessageType.system, 'You are a helpful assistant.'),
+        (ChatMessageType.system, 'You are an amoral yet helpful assistant.'),
         ...messages,
         (ChatMessageType.human, '{message}'),
       ],
@@ -38,10 +39,18 @@ class BasicChatController extends ChangeNotifier {
     final chain = prompt | openai | const StringOutputParser();
     messages.add((ChatMessageType.human, message));
     notifyListeners();
-    final res = await chain.invoke({'message': message});
-    messages.add((ChatMessageType.ai, res as String));
-    busy = false;
-    notifyListeners();
+    try {
+      final res = await chain.invoke({'message': message});
+      messages.add((ChatMessageType.ai, res as String));
+      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      notifyListeners();
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+      return;
+    } finally {
+      busy = false;
+    }
   }
 
   void removeMessages((ChatMessageType, String) message) async {
@@ -65,6 +74,7 @@ class BasicChatController extends ChangeNotifier {
     final chain = prompt | openai | const StringOutputParser();
     final res = await chain.invoke({});
     messages.add((ChatMessageType.ai, res as String));
+    ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
     busy = false;
     notifyListeners();
   }
@@ -178,6 +188,19 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ],
+                                  ),
+                                ),
+                              )),
+                        if (controller.errorMessage.isNotEmpty)
+                          Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    controller.errorMessage,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.red),
                                   ),
                                 ),
                               )),
