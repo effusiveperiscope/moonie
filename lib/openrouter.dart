@@ -112,14 +112,15 @@ class OpenRouterInterface extends ChangeNotifier {
     }
   }
 
-  ChatOpenAI? completions() {
+  ChatOpenAI? completions({String? overrideModel}) {
     final orSettings = settings.openRouterSettings;
-    if (orSettings.currentModel == null) {
+    String? model = overrideModel ?? orSettings.currentModel;
+    if (model == null) {
       return null;
     }
     return ChatOpenAI(
         apiKey: orSettings.openRouterKey,
         baseUrl: openRouterEndpoint,
-        defaultOptions: ChatOpenAIOptions(model: orSettings.currentModel));
+        defaultOptions: ChatOpenAIOptions(model: model));
   }
 }
