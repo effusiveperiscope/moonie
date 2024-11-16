@@ -99,7 +99,7 @@ class Chat2Controller extends ChangeNotifier {
     return ori.settings.useStreamingOutputs;
   }
 
-  void sendMessage(Chat2Message message) async {
+  Future<void> sendMessage(Chat2Message message) async {
     busy = true;
     final openai = ori.completions()!;
     final chain = openai | const StringOutputParser();
@@ -114,7 +114,7 @@ class Chat2Controller extends ChangeNotifier {
       ],
     );
     if (useStreamingOutputs()) {
-      streamInvoke(chain, prompt);
+      await streamInvoke(chain, prompt);
     } else {
       await nonStreamInvoke(chain, prompt);
     }
@@ -136,7 +136,7 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
-  void streamInvoke(Runnable chain, PromptValue prompt) async {
+  Future<void> streamInvoke(Runnable chain, PromptValue prompt) async {
     try {
       busy = true;
       final mes = Chat2Message(type: ChatMessageType.ai, text: '');
@@ -166,7 +166,7 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  void retryMessage(Chat2Message lastMessage) async {
+  Future<void> retryMessage(Chat2Message lastMessage) async {
     removeMessages(lastMessage);
     busy = true;
     notifyListeners();
@@ -178,7 +178,7 @@ class Chat2Controller extends ChangeNotifier {
     final chain = openai | const StringOutputParser();
     // invoke
     if (useStreamingOutputs()) {
-      streamInvoke(chain, prompt);
+      await streamInvoke(chain, prompt);
     } else {
       await nonStreamInvoke(chain, prompt);
     }
@@ -343,13 +343,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: textController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(), isDense: true),
-                        style: const TextStyle(fontSize: 12),
-                        maxLines: null,
-                      ),
+                      child: textInput(),
                     ),
                     const SizedBox(width: 8.0),
                     IconButton.outlined(
@@ -360,64 +354,75 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                       visualDensity: VisualDensity.compact,
                     ),
                     const SizedBox(width: 8.0),
-                    IconButton.outlined(
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          FilePickerResult? result = await FilePicker.platform
-                              .pickFiles(
-                                  type: FileType.custom,
-                                  allowedExtensions: [
-                                'png',
-                                'jpg',
-                                'jpeg',
-                                'webp'
-                              ]);
-                          if (result == null) {
-                            setState(() {
-                              imageFile = null;
-                            });
-                            return;
-                          }
-                          setState(() {
-                            imageFile = result.files.single.path;
-                          });
-                        },
-                        icon: imageFile == null
-                            ? const Icon(Icons.image)
-                            : Image.file(File(imageFile!),
-                                width: 16, height: 16)),
+                    imageAttachButton(),
                     const SizedBox(width: 8.0),
-                    ChangeNotifierProvider.value(
-                      value: widget
-                          .openRouterInterface.settings.openRouterSettings,
-                      child: Consumer<OpenRouterSettings>(
-                          builder: (context, ors, _) {
-                        return IconButton.outlined(
-                            visualDensity: VisualDensity.compact,
-                            onPressed: controller.canSend()
-                                ? () {
-                                    controller.sendMessage(Chat2Message(
-                                        type: ChatMessageType.human,
-                                        text: textController.text,
-                                        imageFile: imageFile));
-                                  }
-                                : null,
-                            icon: controller.busy
-                                ? const SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ))
-                                : const Icon(Icons.send));
-                      }),
-                    )
+                    sendButton(controller)
                   ],
                 ),
               ),
             )
           ],
         );
+      }),
+    );
+  }
+
+  TextField textInput() {
+    return TextField(
+      controller: textController,
+      decoration:
+          const InputDecoration(border: OutlineInputBorder(), isDense: true),
+      style: const TextStyle(fontSize: 12),
+      maxLines: 7,
+    );
+  }
+
+  IconButton imageAttachButton() {
+    return IconButton.outlined(
+        visualDensity: VisualDensity.compact,
+        onPressed: () async {
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+              type: FileType.custom,
+              allowedExtensions: ['png', 'jpg', 'jpeg', 'webp']);
+          if (result == null) {
+            setState(() {
+              imageFile = null;
+            });
+            return;
+          }
+          setState(() {
+            imageFile = result.files.single.path;
+          });
+        },
+        icon: imageFile == null
+            ? const Icon(Icons.image)
+            : Image.file(File(imageFile!), width: 16, height: 16));
+  }
+
+  ChangeNotifierProvider<OpenRouterSettings> sendButton(
+      Chat2Controller controller) {
+    return ChangeNotifierProvider.value(
+      value: widget.openRouterInterface.settings.openRouterSettings,
+      child: Consumer<OpenRouterSettings>(builder: (context, ors, _) {
+        return IconButton.outlined(
+            visualDensity: VisualDensity.compact,
+            onPressed: controller.canSend()
+                ? () async {
+                    await controller.sendMessage(Chat2Message(
+                        type: ChatMessageType.human,
+                        text: textController.text,
+                        imageFile: imageFile));
+                    textController.clear();
+                  }
+                : null,
+            icon: controller.busy
+                ? const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ))
+                : const Icon(Icons.send));
       }),
     );
   }
