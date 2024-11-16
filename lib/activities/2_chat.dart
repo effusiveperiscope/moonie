@@ -135,7 +135,7 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
-  void streamInvoke(Runnable chain, PromptValue prompt) {
+  void streamInvoke(Runnable chain, PromptValue prompt) async {
     try {
       busy = true;
       final mes = Chat2Message(type: ChatMessageType.ai, text: '');
@@ -143,7 +143,7 @@ class Chat2Controller extends ChangeNotifier {
       messages.add(mes);
       notifyListeners();
       final stream = chain.stream(prompt);
-      stream.forEach((event) {
+      await stream.forEach((event) {
         mes.text += event as String;
         notifyListeners();
       });
@@ -358,7 +358,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                         onPressed: () async {
                           FilePickerResult? result = await FilePicker.platform
                               .pickFiles(
-                                  type: FileType.image,
+                                  type: FileType.custom,
                                   allowedExtensions: [
                                 'png',
                                 'jpg',
