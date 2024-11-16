@@ -97,8 +97,13 @@ class OpenRouterInterface extends ChangeNotifier {
     return models;
   }
 
+  void setKey(String key) {
+    settings.openRouterSettings.openRouterKey = key;
+  }
+
   // https://openrouter.ai/docs/limits
-  Future<Map<String, dynamic>?> testKey(String key) async {
+  Future<Map<String, dynamic>?> testKey() async {
+    String key = settings.openRouterSettings.openRouterKey ?? '';
     try {
       final response = await dio.get('https://openrouter.ai/api/v1/auth/key',
           options: Options(headers: {'Authorization': 'Bearer $key'}));

@@ -163,7 +163,7 @@ class Chat2Controller extends ChangeNotifier {
       errorMessage = e.toString();
       notifyListeners();
     } finally {
-      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      ori.testKey();
       busy = false;
     }
   }
@@ -187,7 +187,7 @@ class Chat2Controller extends ChangeNotifier {
       notifyListeners();
     } finally {
       mes.complete = true;
-      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      ori.testKey();
       busy = false;
     }
   }
@@ -225,7 +225,7 @@ class Chat2Controller extends ChangeNotifier {
       errorMessage = e.toString();
       notifyListeners();
     } finally {
-      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      ori.testKey();
       busy = false;
     }
   }

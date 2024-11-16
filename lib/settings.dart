@@ -226,9 +226,8 @@ class _KeyTesterState extends State<KeyTester> {
         const Spacer(),
         ActionChip(
             onPressed: () async {
-              widget.ori
-                  .testKey(widget._openRouterKeyController.text.trim())
-                  .then((data) async {
+              widget.ori.setKey(widget._openRouterKeyController.text.trim());
+              widget.ori.testKey().then((data) async {
                 if (data == null) {
                   setState(() {
                     status =

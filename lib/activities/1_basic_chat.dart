@@ -44,7 +44,7 @@ class BasicChatController extends ChangeNotifier {
     try {
       final res = await chain.invoke({'message': message});
       messages.add((ChatMessageType.ai, res as String));
-      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      ori.testKey();
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
@@ -74,7 +74,7 @@ class BasicChatController extends ChangeNotifier {
     final chain = prompt | openai | const StringOutputParser();
     final res = await chain.invoke({});
     messages.add((ChatMessageType.ai, res as String));
-    ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+    ori.testKey();
     busy = false;
     notifyListeners();
   }
