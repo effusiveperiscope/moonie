@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/utils.dart';
@@ -248,9 +249,15 @@ class _MessageWidgetState extends State<_MessageWidget> {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        message.text,
-                        style: const TextStyle(fontSize: 12),
+                      child: MarkdownBody(
+                        selectable: true,
+                        data: message.text,
+                        // For now we'll disable image building
+                        // Since the AI can hallucinate invalid links
+                        imageBuilder: (uri, title, alt) => const SizedBox(),
+                        styleSheet:
+                            MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                        //style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     if (message.imageFile != null)
