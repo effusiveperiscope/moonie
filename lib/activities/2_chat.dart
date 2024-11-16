@@ -379,12 +379,12 @@ class _Chat2WidgetState extends State<Chat2Widget> {
 
   TextField textInput() {
     return TextField(
-      controller: textController,
-      decoration:
-          const InputDecoration(border: OutlineInputBorder(), isDense: true),
-      style: const TextStyle(fontSize: 12),
-      maxLines: 7,
-    );
+        controller: textController,
+        decoration:
+            const InputDecoration(border: OutlineInputBorder(), isDense: true),
+        style: const TextStyle(fontSize: 12),
+        maxLines: 7,
+        minLines: 1);
   }
 
   IconButton imageAttachButton() {

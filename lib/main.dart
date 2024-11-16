@@ -61,7 +61,7 @@ class MainApp extends StatelessWidget {
                               style: style,
                             ),
                             Text(
-                                'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(4)}',
+                                'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(6)}',
                                 style: style)
                           ],
                         );
