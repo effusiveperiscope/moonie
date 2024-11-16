@@ -148,6 +148,7 @@ class Chat2Controller extends ChangeNotifier {
         mes.text += event as String;
         notifyListeners();
       });
+      errorMessage = '';
     } catch (e) {
       errorMessage = e.toString();
       notifyListeners();
@@ -167,20 +168,29 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   Future<void> retryMessage(Chat2Message lastMessage) async {
-    removeMessages(lastMessage);
-    busy = true;
-    notifyListeners();
-    final prompt = PromptValue.chat([
-      ...prefill().map((e) => e.message()),
-      ...(messages.map((e) => e.message()).toList()),
-    ]);
-    final openai = ori.completions()!;
-    final chain = openai | const StringOutputParser();
-    // invoke
-    if (useStreamingOutputs()) {
-      await streamInvoke(chain, prompt);
-    } else {
-      await nonStreamInvoke(chain, prompt);
+    try {
+      removeMessages(lastMessage);
+      busy = true;
+      notifyListeners();
+      final prompt = PromptValue.chat([
+        ...prefill().map((e) => e.message()),
+        ...(messages.map((e) => e.message()).toList()),
+      ]);
+      final openai = ori.completions()!;
+      final chain = openai | const StringOutputParser();
+      // invoke
+      if (useStreamingOutputs()) {
+        await streamInvoke(chain, prompt);
+      } else {
+        await nonStreamInvoke(chain, prompt);
+      }
+      errorMessage = '';
+    } catch (e) {
+      errorMessage = e.toString();
+      notifyListeners();
+    } finally {
+      ori.testKey(ori.settings.openRouterSettings.openRouterKey!);
+      busy = false;
     }
   }
 }
