@@ -55,6 +55,7 @@ class OpenRouterInterface extends ChangeNotifier {
   final dio = Dio();
   List<String> availableModels = [];
   double? creditsRemaining;
+  String errorMessage = '';
 
   // https://openrouter.ai/docs/quick-start
   static const String openRouterEndpoint = 'https://openrouter.ai/api/v1';
@@ -83,6 +84,7 @@ class OpenRouterInterface extends ChangeNotifier {
       }
       return availableModels;
     } catch (e) {
+      errorMessage = e.toString();
       return null;
     }
   }
@@ -105,6 +107,7 @@ class OpenRouterInterface extends ChangeNotifier {
       notifyListeners();
       return data;
     } catch (e) {
+      errorMessage = e.toString();
       return null;
     }
   }

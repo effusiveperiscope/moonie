@@ -232,7 +232,7 @@ class _KeyTesterState extends State<KeyTester> {
                 if (data == null) {
                   setState(() {
                     status =
-                        "could not contact openrouter api with provided key";
+                        "could not contact openrouter api with provided key. error: ${widget.ori.errorMessage}";
                   });
                   return;
                 }
@@ -244,7 +244,8 @@ class _KeyTesterState extends State<KeyTester> {
                 final models = await widget.ori.fetchModels();
                 if (models == null) {
                   setState(() {
-                    status = "could not contact fetch models";
+                    status =
+                        "could not contact fetch models. error: ${widget.ori.errorMessage}";
                   });
                   return;
                 }
