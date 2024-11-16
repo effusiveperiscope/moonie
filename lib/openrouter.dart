@@ -41,8 +41,9 @@ class OpenRouterSettings extends ChangeNotifier {
         'currentModel': _currentModel,
       };
 
-  factory OpenRouterSettings.fromJson(Map<String, dynamic> json) =>
-      OpenRouterSettings(null)
+  factory OpenRouterSettings.fromJson(
+          Map<String, dynamic> json, Settings? settings) =>
+      OpenRouterSettings(settings)
         .._openRouterKey = json['openRouterKey']
         .._currentModel = json['currentModel'];
 }

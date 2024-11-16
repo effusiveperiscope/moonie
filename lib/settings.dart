@@ -28,8 +28,8 @@ class Settings extends ChangeNotifier {
     final readOpenRouterSettings =
         await storage.read(key: "openRouterSettings");
     if (readOpenRouterSettings != null) {
-      settings.openRouterSettings =
-          OpenRouterSettings.fromJson(json.decode(readOpenRouterSettings));
+      settings.openRouterSettings = OpenRouterSettings.fromJson(
+          json.decode(readOpenRouterSettings), settings);
     }
     settings._useStreamingOutputs =
         await storage.read(key: "useStreamingOutputs") == "true";

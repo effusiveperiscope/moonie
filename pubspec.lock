@@ -142,14 +142,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  flutter_markdown:
+  flutter_markdown_selectionarea:
     dependency: "direct main"
     description:
-      name: flutter_markdown
-      sha256: f0e599ba89c9946c8e051780f0ec99aba4ba15895e0380a7ab68f420046fc44e
+      name: flutter_markdown_selectionarea
+      sha256: d4bc27e70a5c40ebdab23a4b81f75d53696a214d4d1f13c12045b38a0ddc58a2
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.4+1"
+    version: "0.6.17+1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
