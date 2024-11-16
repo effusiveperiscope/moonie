@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/openrouter.dart';
@@ -209,10 +210,11 @@ class _MessageWidgetState extends State<_MessageWidget> {
               children: [
                 Row(
                   children: [
-                    Text(message.name(showModel: true),
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 12)),
-                    const Spacer(),
+                    Expanded(
+                      child: Text(message.name(showModel: true),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
                     // Should only be able to retry AI messages
                     if (message.type == ChatMessageType.ai)
                       SizedBox(
@@ -243,9 +245,21 @@ class _MessageWidgetState extends State<_MessageWidget> {
                   ],
                 ),
                 const Divider(),
-                Text(
-                  message.text,
-                  style: const TextStyle(fontSize: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        message.text,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    if (message.imageFile != null)
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.file(File(message.imageFile!)),
+                      ))
+                  ],
                 ),
               ],
             ),
@@ -267,6 +281,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
       TextEditingController(text: 'Hello, this is a test.');
   late final Chat2Controller controller;
   final FocusNode focusNode = FocusNode();
+  String? imageFile;
 
   @override
   void initState() {
@@ -325,6 +340,8 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                         controller: textController,
                         decoration: const InputDecoration(
                             border: OutlineInputBorder(), isDense: true),
+                        style: const TextStyle(fontSize: 12),
+                        maxLines: null,
                       ),
                     ),
                     const SizedBox(width: 8.0),
@@ -333,7 +350,35 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                         controller.clear();
                       },
                       icon: const Icon(Icons.restart_alt),
+                      visualDensity: VisualDensity.compact,
                     ),
+                    const SizedBox(width: 8.0),
+                    IconButton.outlined(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () async {
+                          FilePickerResult? result = await FilePicker.platform
+                              .pickFiles(
+                                  type: FileType.image,
+                                  allowedExtensions: [
+                                'png',
+                                'jpg',
+                                'jpeg',
+                                'webp'
+                              ]);
+                          if (result == null) {
+                            setState(() {
+                              imageFile = null;
+                            });
+                            return;
+                          }
+                          setState(() {
+                            imageFile = result.files.single.path;
+                          });
+                        },
+                        icon: imageFile == null
+                            ? const Icon(Icons.image)
+                            : Image.file(File(imageFile!),
+                                width: 16, height: 16)),
                     const SizedBox(width: 8.0),
                     ChangeNotifierProvider.value(
                       value: widget
@@ -341,12 +386,13 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                       child: Consumer<OpenRouterSettings>(
                           builder: (context, ors, _) {
                         return IconButton.outlined(
+                            visualDensity: VisualDensity.compact,
                             onPressed: controller.canSend()
                                 ? () {
                                     controller.sendMessage(Chat2Message(
-                                      type: ChatMessageType.human,
-                                      text: textController.text,
-                                    ));
+                                        type: ChatMessageType.human,
+                                        text: textController.text,
+                                        imageFile: imageFile));
                                   }
                                 : null,
                             icon: controller.busy
