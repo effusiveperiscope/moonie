@@ -151,6 +151,7 @@ class Chat2Controller extends ChangeNotifier {
     try {
       final res = await chain.invoke(prompt);
       final mes = Chat2Message(type: ChatMessageType.ai, text: res as String);
+      mes.complete = true;
       updateWithMessage(mes);
       notifyListeners();
     } catch (e) {
