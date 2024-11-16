@@ -112,18 +112,12 @@ class Chat2Controller extends ChangeNotifier {
 
   Future<void> sendMessage(Chat2Message message) async {
     busy = true;
-    final openai = ori.completions()!;
-    final chain = openai | const StringOutputParser();
+    final chain = buildChain();
 
     messages.add(message);
     notifyListeners();
     // invoke
-    final prompt = PromptValue.chat(
-      [
-        ...prefill().map((e) => e.message()),
-        ...messages.map((e) => e.message())
-      ],
-    );
+    final prompt = buildPrompt();
     final res = await invoke(chain, prompt);
     if (res == 1) {
       errorMessage = 'Request cancelled';
@@ -157,9 +151,7 @@ class Chat2Controller extends ChangeNotifier {
     try {
       final res = await chain.invoke(prompt);
       final mes = Chat2Message(type: ChatMessageType.ai, text: res as String);
-      mes.model = ori.currentModel();
-      mes.complete = true;
-      messages.add(mes);
+      updateWithMessage(mes);
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
@@ -174,9 +166,7 @@ class Chat2Controller extends ChangeNotifier {
     final mes = Chat2Message(type: ChatMessageType.ai, text: '');
     try {
       busy = true;
-      mes.model = ori.currentModel();
-      mes.complete = false;
-      messages.add(mes);
+      updateWithMessage(mes);
       notifyListeners();
       final stream = chain.stream(prompt);
       await stream.forEach((event) {
@@ -194,6 +184,12 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
+  void updateWithMessage(Chat2Message message) {
+    message.model = ori.currentModel();
+    message.complete = false;
+    messages.add(message);
+  }
+
   void removeMessages(Chat2Message message) async {
     int index = messages.lastIndexWhere((element) => element == message);
     if (index == -1) {
@@ -203,6 +199,18 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
+  PromptValue buildPrompt() {
+    return PromptValue.chat([
+      ...prefill().map((e) => e.message()),
+      ...(messages.map((e) => e.message()).toList()),
+    ]);
+  }
+
+  Runnable buildChain() {
+    final openai = ori.completions()!;
+    return openai | const StringOutputParser();
+  }
+
   Future<void> retryMessage(Chat2Message? lastMessage) async {
     try {
       if (lastMessage != null) {
@@ -210,12 +218,8 @@ class Chat2Controller extends ChangeNotifier {
       }
       busy = true;
       notifyListeners();
-      final prompt = PromptValue.chat([
-        ...prefill().map((e) => e.message()),
-        ...(messages.map((e) => e.message()).toList()),
-      ]);
-      final openai = ori.completions()!;
-      final chain = openai | const StringOutputParser();
+      final prompt = buildPrompt();
+      final chain = buildChain();
       // invoke
       final res = await invoke(chain, prompt);
       if (res == 1) {
