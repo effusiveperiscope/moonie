@@ -38,33 +38,35 @@ class MainApp extends StatelessWidget {
             title: Row(
               children: [
                 const Text("moonie"),
-                const Spacer(),
-                MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(
-                        value: core.settings.openRouterSettings,
-                      ),
-                      ChangeNotifierProvider.value(
-                        value: core.openRouterInterface,
-                      ),
-                    ],
-                    child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
-                        builder: (context, settings, interface, _) {
-                      TextStyle style = const TextStyle(fontSize: 10.0);
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'model: ${settings.currentModel}',
-                            style: style,
-                          ),
-                          Text(
-                              'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(4)}',
-                              style: style)
-                        ],
-                      );
-                    }))
+                const SizedBox(width: 16),
+                Expanded(
+                  child: MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider.value(
+                          value: core.settings.openRouterSettings,
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: core.openRouterInterface,
+                        ),
+                      ],
+                      child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
+                          builder: (context, settings, interface, _) {
+                        TextStyle style = const TextStyle(fontSize: 10.0);
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'model: ${settings.currentModel}',
+                              style: style,
+                            ),
+                            Text(
+                                'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(4)}',
+                                style: style)
+                          ],
+                        );
+                      })),
+                )
               ],
             ),
             backgroundColor: colorScheme.surfaceContainer,
