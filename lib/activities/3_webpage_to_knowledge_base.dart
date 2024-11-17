@@ -54,12 +54,13 @@ class WebpageToKnowledgeBaseController extends Chat2Controller {
     }
 
     busy = true;
+    messages.clear();
+    notifyListeners();
+
     final dio = Dio();
     final response = dio.get(_pageUrl);
     final rawPage = (await response).data as String;
     pageContents = cleanPlainText(cleanHtml(rawPage));
-    messages.clear();
-    notifyListeners();
 
     final chain = buildChain();
     final res = await invoke(chain, await buildPrompt());
