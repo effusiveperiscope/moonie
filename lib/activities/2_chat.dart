@@ -110,7 +110,7 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Chat2Message> prefill() {
+  List<Chat2Message> sysPrompt() {
     return [Chat2Message(type: ChatMessageType.system, text: baseSystemPrompt)];
   }
 
@@ -216,7 +216,7 @@ class Chat2Controller extends ChangeNotifier {
     // final jailbreak1 =
     // await rootBundle.loadString('assets/prompts/jailbreak1.txt');
     return PromptValue.chat([
-      ...prefill().map((e) => e.message()),
+      ...sysPrompt().map((e) => e.message()),
       ...(messages.map((e) => e.message()).toList()),
       //ChatMessage.ai(jailbreak1)
     ]);
