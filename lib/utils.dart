@@ -1,3 +1,4 @@
+import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 
@@ -35,4 +36,37 @@ MarkdownStyleSheet fromThemeWithBaseFontSize(
     code: theme.textTheme.bodyLarge!
         .copyWith(fontSize: baseFontSize, fontFamily: 'monospace'),
   );
+}
+
+String cleanHtml(String rawPage) {
+  final soup = BeautifulSoup(rawPage);
+
+  final tagsToPrune = [
+    'script',
+    'style',
+    'noscript',
+    'meta',
+    'link',
+    'form',
+    'iframe',
+    'button',
+    'input',
+    'textarea',
+    'nav',
+    'footer',
+    'aside',
+    'svg',
+  ];
+  for (final tag in tagsToPrune) {
+    soup.findAll(tag).forEach((e) => e.decompose());
+  }
+  return soup.getText();
+}
+
+String cleanPlainText(String input) {
+  // Remove consecutive newlines
+  input = input.replaceAll(RegExp(r'\n\s*\n+'), '\n');
+
+  // Trim leading and trailing spaces
+  return input.trim();
 }

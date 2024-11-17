@@ -452,7 +452,11 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ...widget.children,
+                            for (final child in widget.children)
+                              Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: child,
+                              ),
                             for (final message in controller.messages)
                               _MessageWidget(
                                   message: message, controller: controller),

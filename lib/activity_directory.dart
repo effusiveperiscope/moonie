@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat.dart';
+import 'package:moonie/activities/3_webpage_to_knowledge_base.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
@@ -14,6 +15,7 @@ class ActivityDirectory extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<ActivityWidget> activities = [
       Chat2Widget(core: core),
+      WebpageToKnowledgeBase(core: core)
     ];
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -50,7 +52,7 @@ class ActivityDirectory extends StatelessWidget {
                         ],
                         title: Row(
                           children: [
-                            Text(activity.name),
+                            SizedBox(width: 100, child: Text(activity.name)),
                             const Spacer(),
                             OpenRouterInfo(core: core),
                           ],
