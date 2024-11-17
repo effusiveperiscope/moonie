@@ -226,7 +226,7 @@ class Chat2Controller extends ChangeNotifier {
     ]);
   }
 
-  buildChain() {
+  Runnable buildChain() {
     final openai = ori.completions()!;
     return openai | const StringOutputParser();
   }
@@ -405,7 +405,8 @@ class Chat2Widget extends ActivityWidget {
       this.controller})
       : super(
             name: "Chat 2",
-            description: "Ephemeral chat with retries, images, streaming, etc.",
+            description:
+                "Ephemeral chat with retries, images, streaming, etc. Does not save chats.",
             core: core) {}
 
   @override
