@@ -11,6 +11,7 @@ import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class Chat2Message {
   ChatMessageType type;
@@ -77,7 +78,7 @@ class Chat2Controller extends ChangeNotifier {
   String errorMessage = '';
   CancelableOperation? _future;
 
-  String _baseSystemPrompt = 'You are a helpful AI assistant.';
+  String _baseSystemPrompt = 'You are an AI assistant.';
   double _temperature = 1.0;
 
   double get temperature => _temperature;
@@ -129,7 +130,7 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
     // invoke
     final prompt = buildPrompt();
-    final res = await invoke(chain, prompt);
+    final res = await invoke(chain, await prompt);
     if (res == 1) {
       errorMessage = 'Request cancelled';
       return;
@@ -211,10 +212,13 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  PromptValue buildPrompt() {
+  Future<PromptValue> buildPrompt() async {
+    final jailbreak1 =
+        await rootBundle.loadString('assets/prompts/jailbreak1.txt');
     return PromptValue.chat([
       ...prefill().map((e) => e.message()),
       ...(messages.map((e) => e.message()).toList()),
+      //ChatMessage.ai(jailbreak1)
     ]);
   }
 
@@ -233,7 +237,7 @@ class Chat2Controller extends ChangeNotifier {
       final prompt = buildPrompt();
       final chain = buildChain();
       // invoke
-      final res = await invoke(chain, prompt);
+      final res = await invoke(chain, await prompt);
       if (res == 1) {
         errorMessage = 'Request cancelled';
         return;
