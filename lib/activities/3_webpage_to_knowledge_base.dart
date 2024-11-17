@@ -78,7 +78,8 @@ class WebpageToKnowledgeBase extends ActivityWidget {
   const WebpageToKnowledgeBase({super.key, required super.core})
       : super(
             name: "Webpage to knowledge base",
-            description: "Obtain information from a webpage");
+            description:
+                "Obtain information from a webpage and interrogate it");
 
   @override
   State<WebpageToKnowledgeBase> createState() => _WebpageToKnowledgeBaseState();
