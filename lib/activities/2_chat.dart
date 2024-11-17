@@ -122,6 +122,11 @@ class Chat2Controller extends ChangeNotifier {
     _future?.cancel();
   }
 
+  void error(String message) {
+    errorMessage = message;
+    notifyListeners();
+  }
+
   Future<void> sendMessage(Chat2Message message) async {
     busy = true;
     final chain = buildChain();
@@ -132,7 +137,7 @@ class Chat2Controller extends ChangeNotifier {
     final prompt = buildPrompt();
     final res = await invoke(chain, await prompt);
     if (res == 1) {
-      errorMessage = 'Request cancelled';
+      error('Request cancelled');
       return;
     }
   }
@@ -167,8 +172,7 @@ class Chat2Controller extends ChangeNotifier {
       updateWithMessage(mes);
       notifyListeners();
     } catch (e) {
-      errorMessage = e.toString();
-      notifyListeners();
+      error(e.toString());
     } finally {
       ori.testKey();
       busy = false;
@@ -186,9 +190,9 @@ class Chat2Controller extends ChangeNotifier {
         mes.text += event as String;
         notifyListeners();
       });
-      errorMessage = '';
+      error('');
     } catch (e) {
-      errorMessage = e.toString();
+      error(e.toString());
       notifyListeners();
     } finally {
       mes.complete = true;
@@ -239,13 +243,12 @@ class Chat2Controller extends ChangeNotifier {
       // invoke
       final res = await invoke(chain, await prompt);
       if (res == 1) {
-        errorMessage = 'Request cancelled';
+        error('Request cancelled');
         return;
       }
-      errorMessage = '';
+      error('');
     } catch (e) {
-      errorMessage = e.toString();
-      notifyListeners();
+      error(e.toString());
     } finally {
       ori.testKey();
       busy = false;
