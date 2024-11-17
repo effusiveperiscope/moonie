@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:moonie/activities/2_chat.dart';
+import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activity_directory.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
