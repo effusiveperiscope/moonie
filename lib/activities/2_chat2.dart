@@ -396,7 +396,6 @@ class _MessageWidgetState extends State<_MessageWidget> {
 }
 
 class Chat2Widget extends ActivityWidget {
-  late final OpenRouterInterface openRouterInterface;
   final List<Widget> children;
   final Chat2Controller? controller;
   Chat2Widget(
@@ -407,9 +406,7 @@ class Chat2Widget extends ActivityWidget {
       : super(
             name: "Chat 2",
             description: "Ephemeral chat with retries, images, streaming, etc.",
-            core: core) {
-    openRouterInterface = core.openRouterInterface;
-  }
+            core: core) {}
 
   @override
   State<Chat2Widget> createState() => _Chat2WidgetState();
@@ -428,7 +425,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
     if (widget.controller != null)
       controller = widget.controller!;
     else {
-      controller = Chat2Controller(widget.openRouterInterface);
+      controller = Chat2Controller(widget.core.openRouterInterface);
     }
   }
 
@@ -628,7 +625,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
       invocationCallback = null;
     }
     return ChangeNotifierProvider.value(
-      value: widget.openRouterInterface.settings.openRouterSettings,
+      value: widget.core.openRouterInterface.settings.openRouterSettings,
       child: Consumer<OpenRouterSettings>(builder: (context, ors, _) {
         return IconButton.outlined(
             visualDensity: VisualDensity.compact,
