@@ -397,7 +397,8 @@ class _MessageWidgetState extends State<_MessageWidget> {
 
 class Chat2Widget extends ActivityWidget {
   late final OpenRouterInterface openRouterInterface;
-  Chat2Widget({super.key, required MoonieCore core})
+  final List<Widget> children;
+  Chat2Widget({super.key, required MoonieCore core, this.children = const []})
       : super(
             name: "Chat 2",
             description: "Ephemeral chat with retries, images, streaming, etc.",
@@ -442,6 +443,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            ...widget.children,
                             for (final message in controller.messages)
                               _MessageWidget(
                                   message: message, controller: controller),
