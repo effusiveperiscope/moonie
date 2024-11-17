@@ -398,7 +398,12 @@ class _MessageWidgetState extends State<_MessageWidget> {
 class Chat2Widget extends ActivityWidget {
   late final OpenRouterInterface openRouterInterface;
   final List<Widget> children;
-  Chat2Widget({super.key, required MoonieCore core, this.children = const []})
+  final Chat2Controller? controller;
+  Chat2Widget(
+      {super.key,
+      required MoonieCore core,
+      this.children = const [],
+      this.controller})
       : super(
             name: "Chat 2",
             description: "Ephemeral chat with retries, images, streaming, etc.",
@@ -420,7 +425,11 @@ class _Chat2WidgetState extends State<Chat2Widget> {
   @override
   void initState() {
     super.initState();
-    controller = Chat2Controller(widget.openRouterInterface);
+    if (widget.controller != null)
+      controller = widget.controller!;
+    else {
+      controller = Chat2Controller(widget.openRouterInterface);
+    }
   }
 
   @override
@@ -668,7 +677,7 @@ class _GenerationSettingsDialogState extends State<GenerationSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle inputStyle = TextStyle(fontSize: 12.0);
+    const TextStyle inputStyle = TextStyle(fontSize: 12.0);
     return AlertDialog(
       title: const Text('Generation settings'),
       content: Column(
