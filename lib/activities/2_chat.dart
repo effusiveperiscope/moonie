@@ -213,8 +213,8 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   Future<PromptValue> buildPrompt() async {
-    final jailbreak1 =
-        await rootBundle.loadString('assets/prompts/jailbreak1.txt');
+    // final jailbreak1 =
+    // await rootBundle.loadString('assets/prompts/jailbreak1.txt');
     return PromptValue.chat([
       ...prefill().map((e) => e.message()),
       ...(messages.map((e) => e.message()).toList()),
