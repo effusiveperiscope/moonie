@@ -119,7 +119,7 @@ class OpenRouterInterface extends ChangeNotifier {
     }
   }
 
-  ChatOpenAI? completions({String? overrideModel}) {
+  ChatOpenAI? completions({String? overrideModel, double? temperature}) {
     final orSettings = settings.openRouterSettings;
     String? model = overrideModel ?? orSettings.currentModel;
     if (model == null) {
@@ -128,7 +128,8 @@ class OpenRouterInterface extends ChangeNotifier {
     return ChatOpenAI(
         apiKey: orSettings.openRouterKey,
         baseUrl: openRouterEndpoint,
-        defaultOptions: ChatOpenAIOptions(model: model));
+        defaultOptions:
+            ChatOpenAIOptions(model: model, temperature: temperature));
   }
 }
 

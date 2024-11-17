@@ -77,6 +77,21 @@ class Chat2Controller extends ChangeNotifier {
   String errorMessage = '';
   CancelableOperation? _future;
 
+  String _baseSystemPrompt = 'You are a helpful AI assistant.';
+  double _temperature = 1.0;
+
+  double get temperature => _temperature;
+  set temperature(double value) {
+    _temperature = value;
+    notifyListeners();
+  }
+
+  String get baseSystemPrompt => _baseSystemPrompt;
+  set baseSystemPrompt(String value) {
+    _baseSystemPrompt = value;
+    notifyListeners();
+  }
+
   Chat2Controller(this.ori);
 
   bool get busy => _busy;
@@ -94,12 +109,8 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  // TODO this can be customizable later
   List<Chat2Message> prefill() {
-    return [
-      Chat2Message(
-          type: ChatMessageType.system, text: 'You are a helpful AI assistant.')
-    ];
+    return [Chat2Message(type: ChatMessageType.system, text: baseSystemPrompt)];
   }
 
   bool useStreamingOutputs() {
@@ -483,7 +494,11 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                     const SizedBox(width: 8.0),
                     PopupMenuButton(
                       itemBuilder: (context) {
-                        return [resetButton(controller), imageAttachButton()];
+                        return [
+                          resetButton(controller),
+                          imageAttachButton(),
+                          generationSettings(controller)
+                        ];
                       },
                     ),
                   ],
@@ -493,6 +508,24 @@ class _Chat2WidgetState extends State<Chat2Widget> {
           ],
         );
       }),
+    );
+  }
+
+  PopupMenuItem generationSettings(Chat2Controller controller) {
+    return PopupMenuItem(
+      child: const Row(
+        children: [
+          Icon(Icons.settings_outlined),
+          SizedBox(width: 8),
+          Text('Generation settings')
+        ],
+      ),
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (context) =>
+                GenerationSettingsDialog(controller: controller));
+      },
     );
   }
 
@@ -587,6 +620,75 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                     ))
                 : const Icon(Icons.send));
       }),
+    );
+  }
+}
+
+class GenerationSettingsDialog extends StatefulWidget {
+  const GenerationSettingsDialog({
+    required this.controller,
+    Key? key,
+  }) : super(key: key);
+
+  final Chat2Controller controller;
+
+  @override
+  State<GenerationSettingsDialog> createState() =>
+      _GenerationSettingsDialogState();
+}
+
+class _GenerationSettingsDialogState extends State<GenerationSettingsDialog> {
+  late final TextEditingController _systemPromptController;
+  late final TextEditingController _temperatureController;
+
+  @override
+  void initState() {
+    super.initState();
+    _systemPromptController =
+        TextEditingController(text: widget.controller.baseSystemPrompt);
+    _temperatureController =
+        TextEditingController(text: widget.controller.temperature.toString());
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _systemPromptController.dispose();
+    _temperatureController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle inputStyle = TextStyle(fontSize: 12.0);
+    return AlertDialog(
+      title: const Text('Generation settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _systemPromptController,
+            decoration: const InputDecoration(labelText: 'System prompt'),
+            maxLines: null,
+            style: inputStyle,
+            onChanged: (value) {
+              setState(() {
+                widget.controller.baseSystemPrompt = value;
+              });
+            },
+          ),
+          TextField(
+            controller: _temperatureController,
+            decoration: const InputDecoration(labelText: 'Temperature'),
+            style: inputStyle,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) {
+              setState(() {
+                widget.controller.temperature = double.parse(value);
+              });
+            },
+          )
+        ],
+      ),
     );
   }
 }
