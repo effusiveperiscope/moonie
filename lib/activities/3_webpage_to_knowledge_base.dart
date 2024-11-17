@@ -7,6 +7,9 @@ import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/utils.dart';
 
+// v1 of this.
+// If a longer webpage is used, we may want to look into vector databases/embeddings
+
 // Testing retrieval of information from a webpage and subsequent interaction
 class WebpageToKnowledgeBaseController extends Chat2Controller {
   String _pageUrl = '';
