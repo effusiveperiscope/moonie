@@ -3,6 +3,8 @@ import 'package:moonie/activities/2_chat.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
+import 'package:moonie/settings.dart';
+import 'package:provider/provider.dart';
 
 class ActivityDirectory extends StatelessWidget {
   final MoonieCore core;
@@ -31,13 +33,28 @@ class ActivityDirectory extends StatelessWidget {
                     .push(MaterialPageRoute(builder: (context) {
                   return Scaffold(
                     appBar: AppBar(
+                        actions: [
+                          IconButton.outlined(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ChangeNotifierProvider.value(
+                                                value: core,
+                                                child: SettingsPage(
+                                                    settings: core.settings))));
+                              },
+                              icon: const Icon(Icons.settings)),
+                          const SizedBox(width: 16)
+                        ],
                         title: Row(
-                      children: [
-                        Text(activity.name),
-                        const Spacer(),
-                        OpenRouterInfo(core: core)
-                      ],
-                    )),
+                          children: [
+                            Text(activity.name),
+                            const Spacer(),
+                            OpenRouterInfo(core: core),
+                          ],
+                        )),
                     body: activity,
                   );
                 }));

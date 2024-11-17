@@ -382,7 +382,7 @@ class Chat2Widget extends ActivityWidget {
   Chat2Widget({super.key, required MoonieCore core})
       : super(
             name: "Chat 2",
-            description: "Chat with retries, images, streaming, etc.",
+            description: "Ephemeral chat with retries, images, streaming, etc.",
             core: core) {
     openRouterInterface = core.openRouterInterface;
   }
@@ -415,31 +415,56 @@ class _Chat2WidgetState extends State<Chat2Widget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                child: SelectableRegion(
-                  selectionControls: MaterialTextSelectionControls(),
-                  focusNode: focusNode,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (final message in controller.messages)
-                          _MessageWidget(
-                              message: message, controller: controller),
-                        if (controller.errorMessage.isNotEmpty)
-                          Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    controller.errorMessage,
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.red),
-                                  ),
-                                ),
-                              )),
-                      ]),
-                ),
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: SelectableRegion(
+                      selectionControls: MaterialTextSelectionControls(),
+                      focusNode: focusNode,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final message in controller.messages)
+                              _MessageWidget(
+                                  message: message, controller: controller),
+                            if (controller.errorMessage.isNotEmpty)
+                              Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        controller.errorMessage,
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.red),
+                                      ),
+                                    ),
+                                  )),
+                          ]),
+                    ),
+                  ),
+                  Container(),
+                  if (imageFile != null)
+                    Positioned(
+                      bottom: 0.0,
+                      left: 8.0,
+                      child: Opacity(
+                        opacity: 0.3,
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.file(
+                              File(
+                                  imageFile!), // Replace with your image source
+                              width: 64, // Adjust size as needed
+                              height: 64, // Adjust size as needed
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                ],
               ),
             ),
             Container(
@@ -454,17 +479,13 @@ class _Chat2WidgetState extends State<Chat2Widget> {
                       child: textInput(),
                     ),
                     const SizedBox(width: 8.0),
-                    IconButton.outlined(
-                      onPressed: () {
-                        controller.clear();
+                    sendButton(controller),
+                    const SizedBox(width: 8.0),
+                    PopupMenuButton(
+                      itemBuilder: (context) {
+                        return [resetButton(controller), imageAttachButton()];
                       },
-                      icon: const Icon(Icons.restart_alt),
-                      visualDensity: VisualDensity.compact,
                     ),
-                    const SizedBox(width: 8.0),
-                    imageAttachButton(),
-                    const SizedBox(width: 8.0),
-                    sendButton(controller)
                   ],
                 ),
               ),
@@ -473,6 +494,20 @@ class _Chat2WidgetState extends State<Chat2Widget> {
         );
       }),
     );
+  }
+
+  PopupMenuItem resetButton(Chat2Controller controller) {
+    return PopupMenuItem(
+        onTap: () {
+          controller.clear();
+        },
+        child: const Row(
+          children: [
+            Icon(Icons.restart_alt),
+            SizedBox(width: 8),
+            Text('Reset')
+          ],
+        ));
   }
 
   TextField textInput() {
@@ -485,10 +520,9 @@ class _Chat2WidgetState extends State<Chat2Widget> {
         minLines: 1);
   }
 
-  IconButton imageAttachButton() {
-    return IconButton.outlined(
-        visualDensity: VisualDensity.compact,
-        onPressed: () async {
+  PopupMenuItem imageAttachButton() {
+    return PopupMenuItem(
+        onTap: () async {
           FilePickerResult? result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
               allowedExtensions: ['png', 'jpg', 'jpeg', 'webp']);
@@ -502,9 +536,13 @@ class _Chat2WidgetState extends State<Chat2Widget> {
             imageFile = result.files.single.path;
           });
         },
-        icon: imageFile == null
-            ? const Icon(Icons.image)
-            : Image.file(File(imageFile!), width: 16, height: 16));
+        child: Row(children: [
+          imageFile == null
+              ? const Icon(Icons.image)
+              : Image.file(File(imageFile!), width: 16, height: 16),
+          const SizedBox(width: 8),
+          const Text('Attach image')
+        ]));
   }
 
   ChangeNotifierProvider<OpenRouterSettings> sendButton(
@@ -525,6 +563,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
             mes.complete = true;
             await controller.sendMessage(mes);
             textController.clear();
+            imageFile = null;
           } else {
             await controller.retryMessage(null);
           }
