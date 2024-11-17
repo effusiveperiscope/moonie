@@ -142,7 +142,7 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
-  Future<dynamic> invoke(Runnable chain, PromptValue prompt) async {
+  Future<dynamic> invoke(Runnable chain, dynamic prompt) async {
     if (useStreamingOutputs()) {
       _future = CancelableOperation.fromFuture(
         streamInvoke(chain, prompt),
@@ -226,7 +226,7 @@ class Chat2Controller extends ChangeNotifier {
     ]);
   }
 
-  Runnable buildChain() {
+  buildChain() {
     final openai = ori.completions()!;
     return openai | const StringOutputParser();
   }
