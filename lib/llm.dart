@@ -1,5 +1,4 @@
 import 'package:langchain_openai/langchain_openai.dart';
-import 'package:moonie/settings.dart';
 
 abstract class OpenAIInterface {
   String? currentModel();

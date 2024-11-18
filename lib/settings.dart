@@ -156,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   null) {
                             dropdownitems.add(DropdownMenuItem(
                                 value: dropdownvalue,
-                                child: Text(dropdownvalue!)));
+                                child: Text(dropdownvalue)));
                           }
                           return DropdownButton<String>(
                             isExpanded: true,
