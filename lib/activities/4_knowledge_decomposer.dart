@@ -185,7 +185,8 @@ class _KnowledgeDecomposerWidgetState extends State<KnowledgeDecomposerWidget> {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                    'Note - this can be fairly token intensive because it passes the entire card in as context repeatedly. Advise use on local model if possible.'),
+                    'Note - this can be fairly token intensive because it passes the entire card in as context repeatedly.'
+                    'Advise use on local model if possible. Generally a large context size (>4096) is not necessary (depending on card size).'),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
