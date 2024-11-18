@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/core.dart';
+import 'package:moonie/llm.dart';
 import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +51,7 @@ class OpenRouterSettings extends ChangeNotifier {
         .._currentModel = json['currentModel'];
 }
 
-class OpenRouterInterface extends ChangeNotifier {
+class OpenRouterInterface extends ChangeNotifier implements OpenAIInterface {
   Settings settings;
   OpenRouterInterface(this.settings);
 
@@ -62,6 +63,7 @@ class OpenRouterInterface extends ChangeNotifier {
   // https://openrouter.ai/docs/quick-start
   static const String openRouterEndpoint = 'https://openrouter.ai/api/v1';
 
+  @override
   String? currentModel() {
     return settings.openRouterSettings.currentModel;
   }
@@ -99,8 +101,14 @@ class OpenRouterInterface extends ChangeNotifier {
     return models;
   }
 
+  @override
   void setKey(String key) {
     settings.openRouterSettings.openRouterKey = key;
+  }
+
+  @override
+  void postGenHook() {
+    testKey();
   }
 
   // https://openrouter.ai/docs/limits
@@ -119,6 +127,7 @@ class OpenRouterInterface extends ChangeNotifier {
     }
   }
 
+  @override
   ChatOpenAI? completions({String? overrideModel, double? temperature}) {
     final orSettings = settings.openRouterSettings;
     String? model = overrideModel ?? orSettings.currentModel;

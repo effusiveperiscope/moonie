@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
+import 'package:moonie/core.dart';
+import 'package:moonie/llm.dart';
 import 'package:moonie/openrouter.dart';
+import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 
 class BasicChatController extends ChangeNotifier {
-  final OpenRouterInterface ori;
+  final OpenAIInterface ifc;
   List<(ChatMessageType, String)> messages = [];
   bool _busy = false;
   String errorMessage = '';
@@ -17,10 +20,10 @@ class BasicChatController extends ChangeNotifier {
     notifyListeners();
   }
 
-  BasicChatController(this.ori);
+  BasicChatController(this.ifc);
 
   bool canSend() {
-    return ori.completions() != null;
+    return ifc.completions() != null;
   }
 
   void clear() {
@@ -37,14 +40,14 @@ class BasicChatController extends ChangeNotifier {
         (ChatMessageType.human, '{message}'),
       ],
     );
-    final openai = ori.completions()!;
+    final openai = ifc.completions()!;
     final chain = prompt | openai | const StringOutputParser();
     messages.add((ChatMessageType.human, message));
     notifyListeners();
     try {
       final res = await chain.invoke({'message': message});
       messages.add((ChatMessageType.ai, res as String));
-      ori.testKey();
+      ifc.postGenHook();
       notifyListeners();
     } catch (e) {
       errorMessage = e.toString();
@@ -70,19 +73,22 @@ class BasicChatController extends ChangeNotifier {
     notifyListeners();
     final prompt = ChatPromptTemplate.fromTemplates(
         [(ChatMessageType.system, systemPrompt), ...messages]);
-    final openai = ori.completions()!;
+    final openai = ifc.completions()!;
     final chain = prompt | openai | const StringOutputParser();
     final res = await chain.invoke({});
     messages.add((ChatMessageType.ai, res as String));
-    ori.testKey();
+    ifc.postGenHook();
     busy = false;
     notifyListeners();
   }
 }
 
 class BasicChatWidget extends StatefulWidget {
-  final OpenRouterInterface openRouterInterface;
-  const BasicChatWidget({super.key, required this.openRouterInterface});
+  final MoonieCore core;
+  late final OpenAIInterface ifc;
+  BasicChatWidget({super.key, required this.core}) {
+    ifc = core.interface!;
+  }
 
   @override
   State<BasicChatWidget> createState() => _BasicChatWidgetState();
@@ -97,7 +103,7 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
   @override
   void initState() {
     super.initState();
-    controller = BasicChatController(widget.openRouterInterface);
+    controller = BasicChatController(widget.ifc);
   }
 
   String chatMessageTypeToName(ChatMessageType type) {
@@ -232,10 +238,8 @@ class _BasicChatWidgetState extends State<BasicChatWidget> {
                     ),
                     const SizedBox(width: 8.0),
                     ChangeNotifierProvider.value(
-                      value: widget
-                          .openRouterInterface.settings.openRouterSettings,
-                      child: Consumer<OpenRouterSettings>(
-                          builder: (context, ors, _) {
+                      value: widget.core.settings,
+                      child: Consumer<Settings>(builder: (context, s, _) {
                         return IconButton.outlined(
                             onPressed: controller.canSend()
                                 ? () {

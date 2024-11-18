@@ -28,7 +28,7 @@ class WebpageToKnowledgeBaseController extends Chat2Controller {
     notifyListeners();
   }
 
-  WebpageToKnowledgeBaseController(super.openRouterInterface);
+  WebpageToKnowledgeBaseController(super.core);
 
   @override
   buildPrompt() async {
@@ -47,7 +47,7 @@ class WebpageToKnowledgeBaseController extends Chat2Controller {
 
   @override
   bool canSend() {
-    return ori.completions() != null && pageContents.isNotEmpty;
+    return ifc.completions() != null && pageContents.isNotEmpty;
   }
 
   Future<void> start() async {
@@ -96,8 +96,7 @@ class _WebpageToKnowledgeBaseState extends State<WebpageToKnowledgeBase> {
   @override
   void initState() {
     super.initState();
-    controller =
-        WebpageToKnowledgeBaseController(widget.core.openRouterInterface);
+    controller = WebpageToKnowledgeBaseController(widget.core);
   }
 
   @override

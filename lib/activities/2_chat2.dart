@@ -6,9 +6,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
+import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
+import 'package:moonie/llm.dart';
 import 'package:moonie/openrouter.dart';
+import 'package:moonie/settings.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -72,7 +75,8 @@ class Chat2Message {
 }
 
 class Chat2Controller extends ChangeNotifier {
-  final OpenRouterInterface ori;
+  final MoonieCore core;
+  late final OpenAIInterface ifc;
   List<Chat2Message> messages = [];
   bool _busy = false;
   String errorMessage = '';
@@ -93,7 +97,9 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  Chat2Controller(this.ori);
+  Chat2Controller(this.core) {
+    ifc = core.openRouterInterface;
+  }
 
   bool get busy => _busy;
   set busy(bool value) {
@@ -102,7 +108,7 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   bool canSend() {
-    return ori.completions() != null;
+    return ifc.completions() != null;
   }
 
   void clear() {
@@ -115,7 +121,7 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   bool useStreamingOutputs() {
-    return ori.settings.useStreamingOutputs;
+    return core.settings.useStreamingOutputs;
   }
 
   void interrupt() {
@@ -174,7 +180,7 @@ class Chat2Controller extends ChangeNotifier {
     } catch (e) {
       error(e.toString());
     } finally {
-      ori.testKey();
+      ifc.postGenHook();
       busy = false;
     }
   }
@@ -196,13 +202,13 @@ class Chat2Controller extends ChangeNotifier {
       notifyListeners();
     } finally {
       mes.complete = true;
-      ori.testKey();
+      ifc.postGenHook();
       busy = false;
     }
   }
 
   void updateWithMessage(Chat2Message message) {
-    message.model = ori.currentModel();
+    message.model = ifc.currentModel();
     message.complete = false;
     messages.add(message);
   }
@@ -227,7 +233,7 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   Runnable buildChain() {
-    final openai = ori.completions()!;
+    final openai = ifc.completions()!;
     return openai | const StringOutputParser();
   }
 
@@ -250,7 +256,7 @@ class Chat2Controller extends ChangeNotifier {
     } catch (e) {
       error(e.toString());
     } finally {
-      ori.testKey();
+      ifc.postGenHook();
       busy = false;
     }
   }
@@ -426,7 +432,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
     if (widget.controller != null)
       controller = widget.controller!;
     else {
-      controller = Chat2Controller(widget.core.openRouterInterface);
+      controller = Chat2Controller(widget.core);
     }
   }
 
@@ -598,8 +604,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
         ]));
   }
 
-  ChangeNotifierProvider<OpenRouterSettings> sendButton(
-      Chat2Controller controller) {
+  ChangeNotifierProvider sendButton(Chat2Controller controller) {
     final void Function()? invocationCallback;
     if (controller.canSend()) {
       if (controller.busy) {
@@ -626,8 +631,8 @@ class _Chat2WidgetState extends State<Chat2Widget> {
       invocationCallback = null;
     }
     return ChangeNotifierProvider.value(
-      value: widget.core.openRouterInterface.settings.openRouterSettings,
-      child: Consumer<OpenRouterSettings>(builder: (context, ors, _) {
+      value: widget.core.settings,
+      child: Consumer<Settings>(builder: (context, s, _) {
         return IconButton.outlined(
             visualDensity: VisualDensity.compact,
             onPressed: invocationCallback,
