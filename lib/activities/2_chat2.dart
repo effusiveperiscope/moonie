@@ -600,7 +600,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
         ]));
   }
 
-  ChangeNotifierProvider sendButton(Chat2Controller controller) {
+  ChangeNotifierProvider<Settings> sendButton(Chat2Controller controller) {
     final void Function()? invocationCallback;
     if (controller.canSend()) {
       if (controller.busy) {
