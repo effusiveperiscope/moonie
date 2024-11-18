@@ -231,8 +231,8 @@ class Chat2Controller extends ChangeNotifier {
   Runnable buildChain() {
     final openai = ifc.completions()!;
     return RunnableFunction(invoke: (i, o) {
-          print(i);
-          print(o);
+          // print(i);
+          // print(o);
           return i!;
         }) |
         openai |
