@@ -73,7 +73,7 @@ class Chat2Message {
 
 class Chat2Controller extends ChangeNotifier {
   final MoonieCore core;
-  late final OpenAIInterface ifc;
+  late final LLMInterface ifc;
   List<Chat2Message> messages = [];
   bool _busy = false;
   String errorMessage = '';

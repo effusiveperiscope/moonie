@@ -1,6 +1,6 @@
 import 'package:langchain_openai/langchain_openai.dart';
 
-abstract class OpenAIInterface {
+abstract class LLMInterface {
   String? currentModel();
   void setKey(String key);
   void postGenHook(); // Handles things like updating credit limits

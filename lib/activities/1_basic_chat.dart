@@ -6,7 +6,7 @@ import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 
 class BasicChatController extends ChangeNotifier {
-  final OpenAIInterface ifc;
+  final LLMInterface ifc;
   List<(ChatMessageType, String)> messages = [];
   bool _busy = false;
   String errorMessage = '';
@@ -84,7 +84,7 @@ class BasicChatController extends ChangeNotifier {
 
 class BasicChatWidget extends StatefulWidget {
   final MoonieCore core;
-  late final OpenAIInterface ifc;
+  late final LLMInterface ifc;
   BasicChatWidget({super.key, required this.core}) {
     ifc = core.interface;
   }

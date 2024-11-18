@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 class MoonieCore extends ChangeNotifier {
   late final Settings settings;
   late final OpenRouterInterface openRouterInterface;
-  late final OpenAIInterface interface;
+  late final LLMInterface interface;
   late final Store store;
 
   static const moonieCoreFolder = 'moonie';

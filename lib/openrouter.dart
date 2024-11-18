@@ -51,7 +51,7 @@ class OpenRouterSettings extends ChangeNotifier {
         .._currentModel = json['currentModel'];
 }
 
-class OpenRouterInterface extends ChangeNotifier implements OpenAIInterface {
+class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
   Settings settings;
   OpenRouterInterface(this.settings);
 

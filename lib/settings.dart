@@ -96,82 +96,35 @@ class _SettingsPageState extends State<SettingsPage> {
           title: const Text("settings"),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              const Text("openrouter",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8.0),
-              Row(
-                children: [
-                  const Text("openrouter key"),
-                  const Spacer(),
-                  SizedBox(
-                      width: 160,
-                      child: TextField(
-                        controller: _openRouterKeyController,
-                        decoration:
-                            const InputDecoration(border: OutlineInputBorder()),
-                      )),
-                ],
-              ),
-              const SizedBox(height: 8.0),
-              KeyTester(
-                ori: ori,
-                openRouterKeyController: _openRouterKeyController,
-                settings: settings,
-              ),
-              const SizedBox(height: 8.0),
-              const Divider(),
-              Row(children: [
-                const Text("show only free models"),
-                const Spacer(),
-                Checkbox(
-                    value: ors.showOnlyFreeModels,
-                    onChanged: (value) {
-                      setState(() {
-                        ors.showOnlyFreeModels = value!;
-                      });
-                    })
-              ]),
-              Row(
-                children: [
-                  const Text("models"),
-                  const Spacer(),
-                  SizedBox(
-                    width: 240,
-                    child: ChangeNotifierProvider.value(
-                        value: ori,
-                        child: Consumer<OpenRouterInterface>(
-                            builder: (context, value, child) {
-                          final dropdownitems = value
-                              .getModels()
-                              .map((e) =>
-                                  DropdownMenuItem(value: e, child: Text(e)))
-                              .toList();
-                          var dropdownvalue = ors.currentModel;
-                          if (dropdownvalue != null &&
-                              dropdownitems.firstWhereOrNull(
-                                      (e) => e.value == dropdownvalue) ==
-                                  null) {
-                            dropdownitems.add(DropdownMenuItem(
-                                value: dropdownvalue,
-                                child: Text(dropdownvalue)));
-                          }
-                          return DropdownButton<String>(
-                            isExpanded: true,
-                            value: dropdownvalue,
-                            items: dropdownitems,
-                            style: const TextStyle(fontSize: 12.0),
-                            onChanged: (String? value) {
-                              setState(() {
-                                ors.currentModel = value!;
-                              });
-                            },
-                          );
-                        })),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      const Row(
+                        children: [
+                          Text("connection settings",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Spacer(),
+                          //DropdownButton(items: , onChanged: onChanged)
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      SizedBox(
+                        height: 200,
+                        child: PageView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            openRouterSettings(ori, settings, ors),
+                          ],
+                        ),
+                      )
+                    ],
                   ),
-                ],
+                ),
               ),
               const Divider(),
               Row(
@@ -192,10 +145,87 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ));
   }
+
+  Column openRouterSettings(
+      OpenRouterInterface ori, Settings settings, OpenRouterSettings ors) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            const Text("openrouter key"),
+            const Spacer(),
+            SizedBox(
+                width: 160,
+                child: TextField(
+                  controller: _openRouterKeyController,
+                  decoration:
+                      const InputDecoration(border: OutlineInputBorder()),
+                )),
+          ],
+        ),
+        const SizedBox(height: 8.0),
+        OpenRouterKeyTester(
+          ori: ori,
+          openRouterKeyController: _openRouterKeyController,
+          settings: settings,
+        ),
+        const SizedBox(height: 8.0),
+        const Divider(),
+        Row(children: [
+          const Text("show only free models"),
+          const Spacer(),
+          Checkbox(
+              value: ors.showOnlyFreeModels,
+              onChanged: (value) {
+                setState(() {
+                  ors.showOnlyFreeModels = value!;
+                });
+              })
+        ]),
+        Row(
+          children: [
+            const Text("models"),
+            const Spacer(),
+            SizedBox(
+              width: 240,
+              child: ChangeNotifierProvider.value(
+                  value: ori,
+                  child: Consumer<OpenRouterInterface>(
+                      builder: (context, value, child) {
+                    final dropdownitems = value
+                        .getModels()
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList();
+                    var dropdownvalue = ors.currentModel;
+                    if (dropdownvalue != null &&
+                        dropdownitems.firstWhereOrNull(
+                                (e) => e.value == dropdownvalue) ==
+                            null) {
+                      dropdownitems.add(DropdownMenuItem(
+                          value: dropdownvalue, child: Text(dropdownvalue)));
+                    }
+                    return DropdownButton<String>(
+                      isExpanded: true,
+                      value: dropdownvalue,
+                      items: dropdownitems,
+                      style: const TextStyle(fontSize: 12.0),
+                      onChanged: (String? value) {
+                        setState(() {
+                          ors.currentModel = value!;
+                        });
+                      },
+                    );
+                  })),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
-class KeyTester extends StatefulWidget {
-  const KeyTester({
+class OpenRouterKeyTester extends StatefulWidget {
+  const OpenRouterKeyTester({
     super.key,
     required this.ori,
     required TextEditingController openRouterKeyController,
@@ -207,10 +237,10 @@ class KeyTester extends StatefulWidget {
   final Settings settings;
 
   @override
-  State<KeyTester> createState() => _KeyTesterState();
+  State<OpenRouterKeyTester> createState() => _OpenRouterKeyTesterState();
 }
 
-class _KeyTesterState extends State<KeyTester> {
+class _OpenRouterKeyTesterState extends State<OpenRouterKeyTester> {
   String status = "";
   @override
   Widget build(BuildContext context) {
