@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:moonie/core.dart';
-import 'package:moonie/openrouter.dart';
+import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';

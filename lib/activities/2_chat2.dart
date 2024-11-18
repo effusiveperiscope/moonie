@@ -8,7 +8,7 @@ import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
-import 'package:moonie/llm.dart';
+import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/settings.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';

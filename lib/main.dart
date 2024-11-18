@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:moonie/activity_directory.dart';
 import 'package:moonie/core.dart';
-import 'package:moonie/openrouter.dart';
+import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:window_manager/window_manager.dart';
 

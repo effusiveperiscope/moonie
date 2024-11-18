@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/core.dart';
-import 'package:moonie/llm.dart';
+import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 
