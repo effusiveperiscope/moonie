@@ -5,7 +5,6 @@ import 'package:moonie/activity_directory.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -46,16 +45,7 @@ class MainApp extends StatelessWidget {
             ),
             backgroundColor: colorScheme.surfaceContainer,
             actions: [
-              IconButton.outlined(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider.value(
-                                value: core,
-                                child: SettingsPage(settings: core.settings))));
-                  },
-                  icon: const Icon(Icons.settings)),
+              SettingsButton(core: core),
               const SizedBox(width: 16.0),
             ],
           ),

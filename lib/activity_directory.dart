@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activities/3_webpage_to_knowledge_base.dart';
+import 'package:moonie/activities/4_knowledge_decomposer.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/openrouter.dart';
@@ -15,7 +16,8 @@ class ActivityDirectory extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<ActivityWidget> activities = [
       Chat2Widget(core: core),
-      WebpageToKnowledgeBase(core: core)
+      WebpageToKnowledgeBase(core: core),
+      KnowledgeDecomposerWidget(core: core)
     ];
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -36,18 +38,7 @@ class ActivityDirectory extends StatelessWidget {
                   return Scaffold(
                     appBar: AppBar(
                         actions: [
-                          IconButton.outlined(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ChangeNotifierProvider.value(
-                                                value: core,
-                                                child: SettingsPage(
-                                                    settings: core.settings))));
-                              },
-                              icon: const Icon(Icons.settings)),
+                          SettingsButton(core: core),
                           const SizedBox(width: 16)
                         ],
                         title: Row(

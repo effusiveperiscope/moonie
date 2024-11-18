@@ -257,3 +257,26 @@ class _KeyTesterState extends State<KeyTester> {
     );
   }
 }
+
+class SettingsButton extends StatelessWidget {
+  const SettingsButton({
+    super.key,
+    required this.core,
+  });
+
+  final MoonieCore core;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.outlined(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ChangeNotifierProvider.value(
+                      value: core,
+                      child: SettingsPage(settings: core.settings))));
+        },
+        icon: const Icon(Icons.settings));
+  }
+}
