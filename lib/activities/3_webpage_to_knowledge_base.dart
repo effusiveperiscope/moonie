@@ -3,6 +3,7 @@ import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:dio/dio.dart';
 import 'package:moonie/activities/activity.dart';
+import 'package:moonie/cookie.dart';
 import 'package:moonie/utils.dart';
 
 // v1 of this.
@@ -54,24 +55,28 @@ class WebpageToKnowledgeBaseController extends Chat2Controller {
       return;
     }
 
-    busy = true;
-    messages.clear();
-    notifyListeners();
+    try {
+      busy = true;
+      messages.clear();
+      notifyListeners();
 
-    final dio = Dio();
-    final response = dio.get(_pageUrl);
-    final rawPage = (await response).data as String;
-    pageContents = cleanPlainText(cleanHtml(rawPage));
+      final dio = myDio();
+      final response = dio.get(_pageUrl);
+      final rawPage = (await response).data as String;
+      pageContents = cleanPlainText(cleanHtml(rawPage));
 
-    final chain = buildChain();
-    final res = await invoke(chain, await buildPrompt());
-    if (res == 1) {
-      error('Request cancelled');
-      return;
+      final chain = buildChain();
+      final res = await invoke(chain, await buildPrompt());
+      if (res == 1) {
+        error('Request cancelled');
+        return;
+      }
+      error('');
+    } catch (e) {
+      error(e.toString());
+    } finally {
+      busy = false;
     }
-    error('');
-
-    busy = false;
   }
 }
 

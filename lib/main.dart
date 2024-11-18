@@ -5,9 +5,11 @@ import 'package:moonie/activity_directory.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
+import 'package:rhttp/rhttp.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
+  await Rhttp.init();
   WidgetsFlutterBinding.ensureInitialized();
   MoonieCore core = await MoonieCore.create();
   if (Platform.isWindows) {
@@ -39,7 +41,7 @@ class MainApp extends StatelessWidget {
                 const Text("moonie"),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: OpenRouterInfo(core: core),
+                  child: core.interface.infoWidget(core),
                 )
               ],
             ),

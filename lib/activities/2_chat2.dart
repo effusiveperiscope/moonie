@@ -73,7 +73,6 @@ class Chat2Message {
 
 class Chat2Controller extends ChangeNotifier {
   final MoonieCore core;
-  late final LLMInterface ifc;
   List<Chat2Message> messages = [];
   bool _busy = false;
   String errorMessage = '';
@@ -94,9 +93,9 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  Chat2Controller(this.core) {
-    ifc = core.openRouterInterface;
-  }
+  Chat2Controller(this.core);
+
+  LLMInterface get ifc => core.interface;
 
   bool get busy => _busy;
   set busy(bool value) {
@@ -231,7 +230,13 @@ class Chat2Controller extends ChangeNotifier {
 
   Runnable buildChain() {
     final openai = ifc.completions()!;
-    return openai | const StringOutputParser();
+    return RunnableFunction(invoke: (i, o) {
+          print(i);
+          print(o);
+          return i!;
+        }) |
+        openai |
+        const StringOutputParser();
   }
 
   Future<void> retryMessage(Chat2Message? lastMessage) async {

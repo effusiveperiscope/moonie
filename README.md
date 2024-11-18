@@ -12,3 +12,7 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 - A **preprocessor** is any module that attaches context to the system after the user input is submitted (before the primary AI call).
 - A **postprocessor** is any module that operates on the result of the primary AI call (it may be read-only, or it may alter the result of the primary AI call).
 - A **user input module** is a user-interactable module that can make inputs on behalf of the user.
+
+# Installation
+- Depends on rust for `rhttp` client (this is to get around a problem with the standard library's cookie handling) [rustup](https://rustup.rs/)
+- 

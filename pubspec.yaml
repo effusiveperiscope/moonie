@@ -11,7 +11,9 @@ dependencies:
   beautiful_soup_dart: ^0.3.0
   build_runner: ^2.4.13
   collection: ^1.18.0
+  cookie_jar: ^4.0.8
   dio: ^5.7.0
+  dio_cookie_manager: ^3.1.1
   file_picker: ^8.1.4
   flutter:
     sdk: flutter
@@ -26,6 +28,7 @@ dependencies:
   path_provider: ^2.1.5
   png_chunks_extract: ^1.0.2
   provider: ^6.1.2
+  rhttp: ^0.9.1
   window_manager: ^0.4.3
 
 dev_dependencies:

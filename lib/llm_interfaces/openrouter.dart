@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:langchain_openai/langchain_openai.dart';
+import 'package:moonie/cookie.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/settings.dart';
@@ -55,7 +56,7 @@ class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
   Settings settings;
   OpenRouterInterface(this.settings);
 
-  final dio = Dio();
+  final dio = myDio();
   List<String> availableModels = [];
   double? creditsRemaining;
   String errorMessage = '';
@@ -73,8 +74,7 @@ class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
     try {
       final response = await dio.get('https://openrouter.ai/api/v1/models');
       availableModels.clear();
-      availableModels =
-          response.data['data'].map((e) => e['id']).toList().cast<String>();
+      availableModels = response.data['data'].map((e) => e['id']).toList();
       notifyListeners();
       // If the current model is not available, set it to the first available model
       if (!availableModels.contains(settings.openRouterSettings.currentModel)) {
@@ -89,6 +89,7 @@ class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
       return availableModels;
     } catch (e) {
       errorMessage = e.toString();
+      notifyListeners();
       return null;
     }
   }
@@ -145,43 +146,37 @@ class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
             temperature: temperature,
             responseFormat: responseFormat));
   }
-}
-
-class OpenRouterInfo extends StatelessWidget {
-  const OpenRouterInfo({
-    super.key,
-    required this.core,
-  });
-
-  final MoonieCore core;
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(
-            value: core.settings.openRouterSettings,
-          ),
-          ChangeNotifierProvider.value(
-            value: core.openRouterInterface,
-          ),
-        ],
-        child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
-            builder: (context, settings, interface, _) {
-          TextStyle style = const TextStyle(fontSize: 10.0);
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'model: ${settings.currentModel}',
-                style: style,
-              ),
-              Text(
-                  'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(6)}',
-                  style: style)
-            ],
-          );
-        }));
+  Widget infoWidget(MoonieCore core) {
+    return SizedBox(
+      width: 220,
+      child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(
+              value: core.settings.openRouterSettings,
+            ),
+            ChangeNotifierProvider.value(
+              value: this,
+            ),
+          ],
+          child: Consumer2<OpenRouterSettings, OpenRouterInterface>(
+              builder: (context, settings, interface, _) {
+            TextStyle style = const TextStyle(fontSize: 10.0);
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'OR model: ${settings.currentModel}',
+                  style: style,
+                ),
+                Text(
+                    'credits remaining: ${interface.creditsRemaining?.toStringAsFixed(6)}',
+                    style: style)
+              ],
+            );
+          })),
+    );
   }
 }

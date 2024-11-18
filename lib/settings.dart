@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/core.dart';
+import 'package:moonie/llm_interfaces/llm.dart';
+import 'package:moonie/llm_interfaces/openai.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
@@ -11,18 +14,23 @@ import 'package:collection/collection.dart';
 class Settings extends ChangeNotifier {
   bool _notifyListeners = true;
   bool _useStreamingOutputs = true;
+  LLMInterfaceType _interfaceType = LLMInterfaceType.openrouter;
 
   static const storage = FlutterSecureStorage();
 
   late OpenRouterSettings openRouterSettings;
+  late OpenAISettings openAISettings;
 
-  Settings() {
+  final MoonieCore core;
+
+  Settings(this.core) {
     openRouterSettings = OpenRouterSettings(this);
+    openAISettings = OpenAISettings(this);
   }
 
   /// Read settings from storage
-  static Future<Settings> read() async {
-    final settings = Settings();
+  static Future<Settings> read(final MoonieCore core) async {
+    final settings = Settings(core);
     settings._notifyListeners =
         false; // Avoid triggering redundant writes while reading
     final readOpenRouterSettings =
@@ -31,10 +39,23 @@ class Settings extends ChangeNotifier {
       settings.openRouterSettings = OpenRouterSettings.fromJson(
           json.decode(readOpenRouterSettings), settings);
     }
+    final readOpenAISettings = await storage.read(key: "openAISettings");
+    if (readOpenAISettings != null) {
+      settings.openAISettings =
+          OpenAISettings.fromJson(json.decode(readOpenAISettings), settings);
+    }
     settings._useStreamingOutputs =
         await storage.read(key: "useStreamingOutputs") == "true";
+    settings._interfaceType = LLMInterfaceType
+        .values[int.parse(await storage.read(key: "llmInterfaceType") ?? "0")];
     settings._notifyListeners = true;
     return settings;
+  }
+
+  LLMInterfaceType get interfaceType => _interfaceType;
+  set interfaceType(LLMInterfaceType value) {
+    _interfaceType = value;
+    notifyListeners();
   }
 
   bool get useStreamingOutputs => _useStreamingOutputs;
@@ -45,6 +66,7 @@ class Settings extends ChangeNotifier {
 
   @override
   void notifyListeners() {
+    core.settingsUpdatedHook();
     write();
     if (_notifyListeners) {
       super.notifyListeners();
@@ -57,7 +79,11 @@ class Settings extends ChangeNotifier {
         key: "openRouterSettings",
         value: json.encode(openRouterSettings.toJson()));
     await storage.write(
+        key: "openAISettings", value: json.encode(openAISettings.toJson()));
+    await storage.write(
         key: "useStreamingOutputs", value: _useStreamingOutputs.toString());
+    await storage.write(
+        key: "llmInterfaceType", value: _interfaceType.index.toString());
   }
 }
 
@@ -71,18 +97,30 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late final TextEditingController _openRouterKeyController;
+  late final TextEditingController _openAiKeyController;
+  late final TextEditingController _openAiEndpointController;
+  late final PageController _pageController;
+  LLMInterfaceType _llmInterfaceType = LLMInterfaceType.openrouter;
 
   @override
   void initState() {
     super.initState();
+    _pageController =
+        PageController(initialPage: widget.settings.interfaceType.index);
     _openRouterKeyController = TextEditingController(
         text: widget.settings.openRouterSettings.openRouterKey);
+    _openAiKeyController =
+        TextEditingController(text: widget.settings.openAISettings.openAiKey);
+    _openAiEndpointController = TextEditingController(
+        text: widget.settings.openAISettings.openAiEndpoint);
   }
 
   @override
   void dispose() {
     super.dispose();
     _openRouterKeyController.dispose();
+    _openAiKeyController.dispose();
+    _openAiEndpointController.dispose();
   }
 
   @override
@@ -90,6 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final core = Provider.of<MoonieCore>(context, listen: false);
     final settings = core.settings;
     final ori = core.openRouterInterface;
+    final oai = core.openAiInterface;
     final OpenRouterSettings ors = settings.openRouterSettings;
     return Scaffold(
         appBar: AppBar(
@@ -103,23 +142,47 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Text("connection settings",
+                          const Text("connection settings",
                               style: TextStyle(fontWeight: FontWeight.bold)),
-                          Spacer(),
-                          //DropdownButton(items: , onChanged: onChanged)
+                          const Spacer(),
+                          DropdownButton(
+                              value: settings._interfaceType,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: LLMInterfaceType.openrouter,
+                                    child: Text('openrouter')),
+                                DropdownMenuItem(
+                                    value: LLMInterfaceType.openai,
+                                    child: Text('openai')),
+                              ],
+                              onChanged: (v) {
+                                setState(() {
+                                  _llmInterfaceType = v!;
+                                  widget.settings.interfaceType = v;
+                                  _pageController.jumpToPage(v.index);
+                                });
+                              })
                         ],
                       ),
                       const SizedBox(height: 8.0),
                       SizedBox(
-                        height: 200,
-                        child: PageView(
+                        height: 260,
+                        child: PageView.builder(
                           scrollDirection: Axis.horizontal,
-                          children: [
-                            openRouterSettings(ori, settings, ors),
-                          ],
+                          controller: _pageController,
+                          itemCount: LLMInterfaceType.values.length,
+                          itemBuilder: (context, index) {
+                            if (index == LLMInterfaceType.openrouter.index) {
+                              return openRouterSettings(ori, settings, ors);
+                            } else if (index == LLMInterfaceType.openai.index) {
+                              return openAISettings(oai, settings);
+                            }
+                            return null;
+                          },
                         ),
                       )
                     ],
@@ -146,80 +209,168 @@ class _SettingsPageState extends State<SettingsPage> {
         ));
   }
 
-  Column openRouterSettings(
-      OpenRouterInterface ori, Settings settings, OpenRouterSettings ors) {
-    return Column(
-      children: [
+  Padding openAISettings(OpenAIInterface oai, Settings settings) {
+    final oas = settings.openAISettings;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Text('currently only for oobabooga'),
+        const SizedBox(
+          height: 8,
+        ),
         Row(
           children: [
-            const Text("openrouter key"),
+            const Text("openai key"),
             const Spacer(),
             SizedBox(
-                width: 160,
+                width: 200,
                 child: TextField(
-                  controller: _openRouterKeyController,
+                  controller: _openAiKeyController,
                   decoration:
                       const InputDecoration(border: OutlineInputBorder()),
                 )),
           ],
         ),
         const SizedBox(height: 8.0),
-        OpenRouterKeyTester(
-          ori: ori,
-          openRouterKeyController: _openRouterKeyController,
-          settings: settings,
+        Row(
+          children: [
+            const Text("openai endpoint"),
+            const Spacer(),
+            SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: _openAiEndpointController,
+                  decoration:
+                      const InputDecoration(border: OutlineInputBorder()),
+                )),
+          ],
         ),
         const SizedBox(height: 8.0),
+        ActionChip(
+          label: const Text('Connect'),
+          onPressed: () async {
+            await oai.fetchModels();
+          },
+        ),
+        ChangeNotifierProvider.value(
+            value: oai,
+            child: Consumer<OpenAIInterface>(
+              builder: (context, value, child) {
+                if (oai.errorMessage.isNotEmpty) {
+                  return Text(oai.errorMessage,
+                      style: const TextStyle(color: Colors.red));
+                }
+                return const SizedBox.shrink();
+              },
+            )),
         const Divider(),
-        Row(children: [
-          const Text("show only free models"),
-          const Spacer(),
-          Checkbox(
-              value: ors.showOnlyFreeModels,
-              onChanged: (value) {
-                setState(() {
-                  ors.showOnlyFreeModels = value!;
-                });
-              })
-        ]),
         Row(
           children: [
             const Text("models"),
             const Spacer(),
-            SizedBox(
-              width: 240,
-              child: ChangeNotifierProvider.value(
-                  value: ori,
-                  child: Consumer<OpenRouterInterface>(
-                      builder: (context, value, child) {
-                    final dropdownitems = value
+            ChangeNotifierProvider.value(
+              value: oai,
+              child:
+                  Consumer<OpenAIInterface>(builder: (context, value, child) {
+                return DropdownButton(
+                    value: oas.currentModel,
+                    items: oai
                         .getModels()
                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList();
-                    var dropdownvalue = ors.currentModel;
-                    if (dropdownvalue != null &&
-                        dropdownitems.firstWhereOrNull(
-                                (e) => e.value == dropdownvalue) ==
-                            null) {
-                      dropdownitems.add(DropdownMenuItem(
-                          value: dropdownvalue, child: Text(dropdownvalue)));
-                    }
-                    return DropdownButton<String>(
-                      isExpanded: true,
-                      value: dropdownvalue,
-                      items: dropdownitems,
-                      style: const TextStyle(fontSize: 12.0),
-                      onChanged: (String? value) {
-                        setState(() {
-                          ors.currentModel = value!;
-                        });
-                      },
-                    );
-                  })),
-            ),
+                        .toList(),
+                    style: const TextStyle(fontSize: 12.0),
+                    onChanged: (v) {
+                      setState(() {
+                        oas.currentModel = v!;
+                      });
+                    });
+              }),
+            )
           ],
-        ),
-      ],
+        )
+      ]),
+    );
+  }
+
+  Padding openRouterSettings(
+      OpenRouterInterface ori, Settings settings, OpenRouterSettings ors) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Text("openrouter key"),
+              const Spacer(),
+              SizedBox(
+                  width: 160,
+                  child: TextField(
+                    controller: _openRouterKeyController,
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
+                  )),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          OpenRouterKeyTester(
+            ori: ori,
+            openRouterKeyController: _openRouterKeyController,
+            settings: settings,
+          ),
+          const SizedBox(height: 8.0),
+          const Divider(),
+          Row(children: [
+            const Text("show only free models"),
+            const Spacer(),
+            Checkbox(
+                value: ors.showOnlyFreeModels,
+                onChanged: (value) {
+                  setState(() {
+                    ors.showOnlyFreeModels = value!;
+                  });
+                })
+          ]),
+          Row(
+            children: [
+              const Text("models"),
+              const Spacer(),
+              SizedBox(
+                width: 240,
+                child: ChangeNotifierProvider.value(
+                    value: ori,
+                    child: Consumer<OpenRouterInterface>(
+                        builder: (context, value, child) {
+                      final dropdownitems = value
+                          .getModels()
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList();
+                      var dropdownvalue = ors.currentModel;
+                      if (dropdownvalue != null &&
+                          dropdownitems.firstWhereOrNull(
+                                  (e) => e.value == dropdownvalue) ==
+                              null) {
+                        dropdownitems.add(DropdownMenuItem(
+                            value: dropdownvalue, child: Text(dropdownvalue)));
+                      }
+                      return DropdownButton<String>(
+                        isExpanded: true,
+                        value: dropdownvalue,
+                        items: dropdownitems,
+                        style: const TextStyle(fontSize: 12.0),
+                        onChanged: (String? value) {
+                          setState(() {
+                            ors.currentModel = value!;
+                          });
+                        },
+                      );
+                    })),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

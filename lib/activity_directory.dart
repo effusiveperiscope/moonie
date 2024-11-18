@@ -45,7 +45,7 @@ class ActivityDirectory extends StatelessWidget {
                           children: [
                             SizedBox(width: 100, child: Text(activity.name)),
                             const Spacer(),
-                            OpenRouterInfo(core: core),
+                            core.interface.infoWidget(core),
                           ],
                         )),
                     body: activity,
