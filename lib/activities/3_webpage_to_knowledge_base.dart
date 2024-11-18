@@ -34,7 +34,7 @@ class WebpageToKnowledgeBaseController extends Chat2Controller {
     final prompt = ChatPromptTemplate.fromPromptMessages([
       SystemChatMessagePromptTemplate.fromTemplate(
           'You are an assistant that obtains knowledge from a webpage whose contents are: {pageContents}'),
-      SystemChatMessagePromptTemplate.fromTemplate(
+      HumanChatMessagePromptTemplate.fromTemplate(
           '''Please extract information from the webpage about the following topic: {targetTopic}
           In particular if the webpage is about a person or character, collect information on that person/character.
           ''')

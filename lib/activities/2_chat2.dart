@@ -230,13 +230,7 @@ class Chat2Controller extends ChangeNotifier {
 
   Runnable buildChain() {
     final openai = ifc.completions()!;
-    return RunnableFunction(invoke: (i, o) {
-          // print(i);
-          // print(o);
-          return i!;
-        }) |
-        openai |
-        const StringOutputParser();
+    return openai | const StringOutputParser();
   }
 
   Future<void> retryMessage(Chat2Message? lastMessage) async {
