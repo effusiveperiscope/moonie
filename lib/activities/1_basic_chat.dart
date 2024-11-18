@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm.dart';
-import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 
@@ -87,7 +86,7 @@ class BasicChatWidget extends StatefulWidget {
   final MoonieCore core;
   late final OpenAIInterface ifc;
   BasicChatWidget({super.key, required this.core}) {
-    ifc = core.interface!;
+    ifc = core.interface;
   }
 
   @override

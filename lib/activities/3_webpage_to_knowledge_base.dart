@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:dio/dio.dart';
-import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:moonie/activities/activity.dart';
-import 'package:moonie/core.dart';
 import 'package:moonie/utils.dart';
 
 // v1 of this.

@@ -6,15 +6,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
-import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm.dart';
-import 'package:moonie/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 class Chat2Message {
   ChatMessageType type;
@@ -320,7 +317,7 @@ class _MessageWidgetState extends State<_MessageWidget> {
                                     editMode = !editMode;
                                     if (editMode == true) {
                                       editController.text = message.text;
-                                      print(editController.text);
+                                      //print(editController.text);
                                     }
                                   });
                                 }
@@ -404,16 +401,15 @@ class _MessageWidgetState extends State<_MessageWidget> {
 class Chat2Widget extends ActivityWidget {
   final List<Widget> children;
   final Chat2Controller? controller;
-  Chat2Widget(
+  const Chat2Widget(
       {super.key,
-      required MoonieCore core,
+      required super.core,
       this.children = const [],
       this.controller})
       : super(
             name: "Chat 2",
             description:
-                "Ephemeral chat with retries, images, streaming, etc. Does not save chats.",
-            core: core) {}
+                "Ephemeral chat with retries, images, streaming, etc. Does not save chats.");
 
   @override
   State<Chat2Widget> createState() => _Chat2WidgetState();
@@ -429,9 +425,9 @@ class _Chat2WidgetState extends State<Chat2Widget> {
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null)
+    if (widget.controller != null) {
       controller = widget.controller!;
-    else {
+    } else {
       controller = Chat2Controller(widget.core);
     }
   }
@@ -652,8 +648,8 @@ class _Chat2WidgetState extends State<Chat2Widget> {
 class GenerationSettingsDialog extends StatefulWidget {
   const GenerationSettingsDialog({
     required this.controller,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Chat2Controller controller;
 
