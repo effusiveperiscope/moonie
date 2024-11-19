@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/llm_interfaces/openai.dart';
+import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/objectbox.g.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
@@ -13,6 +14,7 @@ class MoonieCore extends ChangeNotifier {
   late final OpenAIInterface openAiInterface;
   late LLMInterface interface;
   late final Store store;
+  late final RPContext rpContext;
 
   static const moonieCoreFolder = 'moonie';
 
@@ -31,7 +33,10 @@ class MoonieCore extends ChangeNotifier {
     core.settingsUpdatedHook();
 
     final docsDir = await getApplicationDocumentsDirectory();
-    core.store = openStore(p.join(docsDir.path, moonieCoreFolder));
+    //core.store = openStore(directory: p.join(docsDir.path, moonieCoreFolder));
+    core.store = openStore();
+
+    core.rpContext = await RPContext.create(core);
     return core;
   }
 

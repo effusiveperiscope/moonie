@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/activities/activity.dart';
+import 'package:moonie/activities/knowledge_decomposition/prompts.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/utils.dart';
@@ -18,11 +19,12 @@ import 'package:provider/provider.dart';
 // the only reason it's here is so we can fully automate the system.
 class KnowledgeDecomposer extends ChangeNotifier {
   final MoonieCore core;
+  final RPContext context;
   String errorMessage = '';
   String statusMessage = '';
   bool _busy = false;
 
-  KnowledgeDecomposer({required this.core});
+  KnowledgeDecomposer({required this.core, required this.context});
 
   bool get busy => _busy;
   set busy(bool value) {
@@ -53,47 +55,17 @@ class KnowledgeDecomposer extends ChangeNotifier {
     return [];
   }
 
-  static const String listCharactersPrompt =
-      """Determine the name(s) of the primary character(s) (i.e. persons, human or otherwise)
-in the following text. 
-A 'primary character' is one that has a name and is described in detail over 
-a significant portion of the text, not one that is only mentioned tangentially.
-- Return an output in raw JSON format.
-- Do not consider '{{user}}' (the roleplayer) as a character.
-- If a character is unnamed or not described, do not include them.
-- If no characters are present, return the object with an empty array.
-- You may use a 'thinking' field to explain your reasoning.
+  ChatOpenAI? completions() {
+    final ifc = core.interface;
+    return ifc.completions();
+  }
 
-Example output: 
-{{
-"thinking": "Ok. John Doe and Jane Doe are both characters in this text. In addition, a third character, 'Chester', is mentioned but not described.",
-"characters": ["John Doe", "Jane Doe"]}}
-
-The text: {input}""";
-
-  static const String decomposeCharacterPrompt =
-      """You will be given a text and the name of a character within that text.
-Your task is to reformat the text into a structured JSON description of that character
-to construct a knowledge base.
-
-- If there is no information pertaining to a particular field, leave an empty string.
-- Capture as much correct detail as possible without making assumptions. 
-- You are allowed to copy descriptions verbatim if suitable.
-- Do not refer to 'the text' in your descriptions. These descriptions will be used downstream in other systems where the text will not be available.
-- You may use a 'thinking' field to explain your reasoning.
-- Follow the below format, using the same keys.
-
-{{
-  "thinking": "Ok. I don't see any information pertaining to Liora's abilities, so I'll leave that blank.",
-  "appearance": "Liora stands at 5'7 with a lean, athletic build that hints at years of rigorous training. Her deep emerald-green eyes are striking, often described as piercing, and seem to hold unspoken wisdom. Long, dark brown hair is usually tied into a practical braid, though loose strands frame her sharp, freckled face.",
-  "personality": "...",
-  "relations_and_backstory": "..."
-  "abilities": ""
-}}
-
-The character: {character}
-The text: {input}
-""";
+  dynamic executePrompt(String prompt, dynamic input) {
+    final chain = ChatPromptTemplate.fromTemplate(prompt) |
+        completions()! |
+        JsonOutputParser();
+    return chain.invoke(input);
+  }
 
   // Determines what characters are present in the text,
   // Then extracts information on each.
@@ -101,32 +73,45 @@ The text: {input}
   Future<List<BaseNode>> handleCharacterRole(String input) async {
     final ifc = core.interface;
 
+    // TODO Eventually we should somehow move all of these into a
+    // programmatic tree structure - so we can recalculate parts of the
+    // knowledge nodes and update dependent parts of the graph at will
+
+    // DFS traversal would be preferred?
+    // DFS is only useful in a 'speculative' way - so the UI can show the user
+    // what operation needs to be performed next
+
+    // Or even build the tree step-by-step allowing for user interaction?
+    // In this scenario, we would withhold building actual nodes in RP context until the end
+    // (user decides to 'commit' the tree)
+
+    // Have to determine the actual need -- if this works fine no need to change?
+    // It almost certainly will not work fine with current models.
+    // Allowing for user input (so the user can determine whether these things
+    // are even necessary) will save us token golf
+
     try {
       // We don't need to determine the 'relevance' because we can just let the user
       // discard any irrelevant output. Thus we should err on the capturing more irrelevant information than omitting accidentally
-      final listCharsChain =
-          ChatPromptTemplate.fromTemplate(listCharactersPrompt) |
-              ifc.completions()! |
-              JsonOutputParser();
-      //final chain = listCharsChain.withRetry(addJitter: true)
       status('Looking for characters...');
-      final res = await listCharsChain
-          .withRetry(addJitter: true)
-          .invoke({'input': input});
+      final res = await executePrompt(listCharactersPrompt, {'input': input});
       final List characters = (res as Map)['characters'];
       characters.removeWhere((element) =>
           element == '{{user}}' || element.toLowerCase() == 'user');
       status('Got characters: $characters');
       for (final char in characters) {
-        final decomposeCharChain =
-            ChatPromptTemplate.fromTemplate(decomposeCharacterPrompt) |
-                ifc.completions()! |
-                JsonOutputParser();
-        final charRes = await decomposeCharChain
-            .withRetry(addJitter: true)
-            .invoke({'input': input, 'character': char});
+        final charRes = await executePrompt(
+            decomposeCharacterPrompt, {'input': input, 'character': char});
         status('Decomposed character: $char..., res: $charRes');
-        print(charRes);
+        BaseNode characterNode = context.createNode(BaseRole.character, char);
+        characterNode.addAttribute(
+            context.createAttribute('appearance', charRes['appearance']));
+        characterNode.addAttribute(
+            context.createAttribute('personality', charRes['personality']));
+        characterNode.addAttribute(context.createAttribute(
+            'relations_and_backstory', charRes['relations_and_backstory']));
+        characterNode.addAttribute(
+            context.createAttribute('abilities', charRes['abilities']));
       }
       error('');
     } catch (e) {
@@ -160,7 +145,8 @@ class _KnowledgeDecomposerWidgetState extends State<KnowledgeDecomposerWidget> {
   @override
   void initState() {
     super.initState();
-    decomposer = KnowledgeDecomposer(core: widget.core);
+    decomposer =
+        KnowledgeDecomposer(core: widget.core, context: widget.core.rpContext);
   }
 
   void tryLoadCard() {
@@ -231,15 +217,17 @@ class _KnowledgeDecomposerWidgetState extends State<KnowledgeDecomposerWidget> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ActionChip(
-                  label: const Text('Extract knowledge'),
-                  onPressed: (cardPath != null && decomposer.busy == false)
-                      ? () {
-                          decomposer.extract(
-                              card!.replaceCharName(card!.description));
-                        }
-                      : null,
-                ),
+                child: Row(children: [
+                  ActionChip(
+                    label: const Text('Extract knowledge'),
+                    onPressed: (cardPath != null && decomposer.busy == false)
+                        ? () {
+                            decomposer.extract(
+                                'Scenario name: ${card!.name}\nDescription: ${card!.replaceCharName(card!.description)}');
+                          }
+                        : null,
+                  ),
+                ]),
               ),
               ChangeNotifierProvider.value(
                   value: decomposer,

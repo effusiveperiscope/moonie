@@ -113,7 +113,7 @@ final _entities = <obx_int.ModelEntity>[
 /// For Flutter apps, also calls `loadObjectBoxLibraryAndroidCompat()` from
 /// the ObjectBox Flutter library to fix loading the native ObjectBox library
 /// on Android 6 and older.
-obx.Store openStore(String join,
+obx.Store openStore(
     {String? directory,
     int? maxDBSizeInKB,
     int? maxDataSizeInKB,

@@ -45,7 +45,15 @@ class ActivityDirectory extends StatelessWidget {
                           children: [
                             SizedBox(width: 100, child: Text(activity.name)),
                             const Spacer(),
-                            core.interface.infoWidget(core),
+                            ChangeNotifierProvider.value(
+                              value: core.settings,
+                              child: Consumer<Settings>(
+                                  builder: (context, settings, _) {
+                                return Expanded(
+                                  child: core.interface.infoWidget(core),
+                                );
+                              }),
+                            )
                           ],
                         )),
                     body: activity,

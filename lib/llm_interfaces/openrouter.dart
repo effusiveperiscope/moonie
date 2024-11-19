@@ -74,7 +74,8 @@ class OpenRouterInterface extends ChangeNotifier implements LLMInterface {
     try {
       final response = await dio.get('https://openrouter.ai/api/v1/models');
       availableModels.clear();
-      availableModels = response.data['data'].map((e) => e['id']).toList();
+      availableModels = List<String>.from(
+          response.data['data'].map((e) => e['id'] as String));
       notifyListeners();
       // If the current model is not available, set it to the first available model
       if (!availableModels.contains(settings.openRouterSettings.currentModel)) {

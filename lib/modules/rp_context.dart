@@ -2,6 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:moonie/core.dart';
 import 'package:objectbox/objectbox.dart';
 
+/// Maintains the nodes in active context and disk storage.
+/// Also the factory for nodes and attributes.
+class RPContext extends ChangeNotifier {
+  final MoonieCore core;
+  final Store store;
+  late final Box<BaseNode> baseNodes;
+  late final Box<AttributeComponent> attributes;
+
+  final List<BaseNode> activeContext = [];
+
+  static Future<RPContext> create(MoonieCore core) async {
+    final ctx = RPContext(core);
+    ctx.baseNodes = ctx.store.box<BaseNode>();
+    ctx.attributes = ctx.store.box<AttributeComponent>();
+    return ctx;
+  }
+
+  RPContext(this.core) : store = core.store;
+
+  BaseNode createNode(
+    BaseRole role,
+    String name, {
+    String description = '',
+  }) {
+    final node = BaseNode();
+    node.setRole(role);
+    node.name = name;
+    node.description = description;
+    node.context = this;
+    node.id = baseNodes.put(node);
+    return node;
+  }
+
+  AttributeComponent createAttribute(String name, String content,
+      {String description = ''}) {
+    final attr = AttributeComponent();
+    attr.name = name;
+    attr.description = description;
+    attr.content = content;
+    attr.context = this;
+    attr.id = attributes.put(attr);
+    return attr;
+  }
+
+  // Right now the plan is just to spit the entire graph out into context
+  // If we want to look into more sophisticated solutions later,
+  // we could look into letting the LLM use some kind of tool to traverse the graph
+  // or something
+}
+
 enum BaseRole {
   character,
   user,
@@ -10,6 +60,10 @@ enum BaseRole {
   extra,
 }
 
+// Might hold things like RPG stats, not sure
+enum SpecialAttributeType { exampleMessages }
+
+/// A base node of the context graph. Typically a character or a world etc.
 @Entity()
 class BaseNode extends ChangeNotifier {
   int id = 0;
@@ -25,13 +79,13 @@ class BaseNode extends ChangeNotifier {
   }
 
   @Backlink('baseNodeParent')
-  ToMany<AttributeComponent> attributes = ToMany();
+  ToMany<AttributeComponent> _attributes = ToMany();
 
   @Transient()
   RPContext? context;
 
   List<AttributeComponent> getAttributes() {
-    return attributes.map((e) {
+    return _attributes.map((e) {
       e.context = context;
       return e;
     }).toList();
@@ -46,9 +100,19 @@ class BaseNode extends ChangeNotifier {
     role = r.index;
   }
 
+  void addAttribute(AttributeComponent attr) {
+    attr.context = context;
+    _attributes.add(attr);
+  }
+
+  void removeAttribute(AttributeComponent attr) {
+    _attributes.remove(attr);
+  }
+
   BaseNode();
 }
 
+/// An attribute, typically of a base node (can also be a tree structure).
 @Entity()
 class AttributeComponent extends ChangeNotifier {
   int id = 0;
@@ -97,35 +161,4 @@ class AttributeComponent extends ChangeNotifier {
   RPContext? context;
 
   AttributeComponent();
-}
-
-class RPContext extends ChangeNotifier {
-  final MoonieCore core;
-  final Store store;
-  late final Box<BaseNode> baseNodes;
-  late final Box<AttributeComponent> attributes;
-
-  final List<BaseNode> activeContext = [];
-
-  static Future<RPContext> create(MoonieCore core) async {
-    final ctx = RPContext(core);
-    ctx.baseNodes = ctx.store.box<BaseNode>();
-    ctx.attributes = ctx.store.box<AttributeComponent>();
-    return ctx;
-  }
-
-  RPContext(this.core) : store = core.store;
-
-  BaseNode createNode(
-    BaseRole role,
-    String name,
-    String description,
-  ) {
-    final node = BaseNode();
-    node.setRole(role);
-    node.name = name;
-    node.description = description;
-    node.context = this;
-    return node;
-  }
 }
