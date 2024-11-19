@@ -94,12 +94,7 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[
-        obx_int.ModelBacklink(
-            name: 'attributes',
-            srcEntity: 'AttributeComponent',
-            srcField: 'baseNodeParent')
-      ])
+      backlinks: <obx_int.ModelBacklink>[])
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -210,13 +205,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
     BaseNode: obx_int.EntityDefinition<BaseNode>(
         model: _entities[1],
         toOneRelations: (BaseNode object) => [],
-        toManyRelations: (BaseNode object) => {
-              obx_int.RelInfo<AttributeComponent>.toOneBacklink(
-                  5,
-                  object.id,
-                  (AttributeComponent srcObject) =>
-                      srcObject.baseNodeParent): object.attributes
-            },
+        toManyRelations: (BaseNode object) => {},
         getId: (BaseNode object) => object.id,
         setId: (BaseNode object, int id) {
           object.id = id;
@@ -243,11 +232,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGet(buffer, rootOffset, 8, '')
             ..description = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 10, '');
-          obx_int.InternalToManyAccess.setRelInfo<BaseNode>(
-              object.attributes,
-              store,
-              obx_int.RelInfo<AttributeComponent>.toOneBacklink(5, object.id,
-                  (AttributeComponent srcObject) => srcObject.baseNodeParent));
+
           return object;
         })
   };
@@ -306,9 +291,4 @@ class BaseNode_ {
   /// See [BaseNode.description].
   static final description =
       obx.QueryStringProperty<BaseNode>(_entities[1].properties[3]);
-
-  /// see [BaseNode.attributes]
-  static final attributes =
-      obx.QueryBacklinkToMany<AttributeComponent, BaseNode>(
-          AttributeComponent_.baseNodeParent);
 }
