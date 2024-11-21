@@ -16,7 +16,7 @@ void main() async {
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions =
-        const WindowOptions(size: Size(480, 640), maximumSize: Size(640, 820));
+        const WindowOptions(size: Size(480, 640), maximumSize: null);
     windowManager.waitUntilReadyToShow(windowOptions);
   }
   runApp(MainApp(core: core));

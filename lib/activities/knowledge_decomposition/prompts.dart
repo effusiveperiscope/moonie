@@ -92,7 +92,7 @@ Here is the text: {text}
 // If no characters are found inside the card, it is highly likely that
 // the card describes a world. Therefore we should be able to skip the above.
 const String decomposeWorldPrompt =
-    """You will be given a text which may or may not describe a world
+    """You will be given a text which may or may not describe a world.
 Your primary task will be to reformat the text into a structured JSON description of the world to construct a knowledge base.
 
 To do this, you will:
@@ -139,7 +139,7 @@ If so, fill the writing_rules field. If not, leave the field an empty array.
 - Avoid paraphrasing. Capture as much correct detail as possible without making assumptions. 
 - You are allowed to copy descriptions verbatim if suitable.
 - Be careful. 'Writing rules' are distinct from world and character information.
-  - For example, 'Elewyn's is {{user}}'s sister' is character description, not a writing rule.
+  - For example, 'Elewyn is {{user}}'s sister' is character description, not a writing rule.
   - 'There is a law against riding bicycles' is world description, not a writing rule.
 - Return the output in raw JSON format only.
 
