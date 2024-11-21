@@ -3,7 +3,9 @@ import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/objectbox.g.dart';
+import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fw;
 
 class KnowledgeBrowser extends ActivityWidget {
   const KnowledgeBrowser({super.key, required MoonieCore core})
@@ -16,10 +18,21 @@ class KnowledgeBrowser extends ActivityWidget {
   State<KnowledgeBrowser> createState() => _KnowledgeBrowserState();
 }
 
+enum _SortMode {
+  alphabetical,
+  reverseAlphabetical,
+  created,
+  reverseCreated,
+  modified,
+  reverseModified,
+}
+
 class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
   BaseRole currentPage = BaseRole.character;
+  final sort = ValueNotifier(_SortMode.alphabetical);
   final PageController _pageController =
       PageController(initialPage: BaseRole.character.index);
+  final _searchController = TextEditingController();
 
   //ValueNotifier<> sort mode
 
@@ -36,54 +49,103 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ActionChip(
-                avatar: const Icon(Icons.add),
-                label: const Text("Node"),
-                onPressed: () {
-                  addNodeDialog(widget.core);
-                },
-              ),
-              const SizedBox(width: 8),
-              ActionChip(
-                label: const Icon(Icons.delete, size: 20),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-              ActionChip(
-                label: const Icon(Icons.sort, size: 20),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
-              DropdownMenu(
-                width: 150,
-                dropdownMenuEntries: [
-                  for (final e in baseRoleNames.entries)
-                    DropdownMenuEntry(label: e.value, value: e.key)
-                ],
-                textStyle: const TextStyle(
-                  fontSize: 14,
+          SizedBox(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ActionChip(
+                  avatar: const Icon(Icons.add),
+                  label: const Text("Node"),
+                  onPressed: () {
+                    addNodeDialog(widget.core);
+                  },
                 ),
-                initialSelection: currentPage,
-                onSelected: (value) {
-                  setState(() {
-                    currentPage = value!;
-                    _pageController.jumpToPage(currentPage.index);
-                  });
-                },
-              ),
-            ],
+                const SizedBox(width: 8),
+                // ActionChip(
+                // label: const Icon(Icons.delete, size: 20),
+                // onPressed: () {},
+                // ),
+                const SizedBox(width: 8),
+                // ActionChip(
+                //   label: const Icon(Icons.sort, size: 20),
+                //   onPressed: () {},
+                // ),
+                SizedBox(
+                  width: 130,
+                  child: DropdownMenu(
+                    dropdownMenuEntries: const [
+                      DropdownMenuEntry(
+                          label: 'A-Z', value: _SortMode.alphabetical),
+                      DropdownMenuEntry(
+                          label: 'Z-A', value: _SortMode.reverseAlphabetical),
+                      DropdownMenuEntry(
+                          label: 'created (desc)', value: _SortMode.created),
+                      DropdownMenuEntry(
+                          label: 'created (asc)',
+                          value: _SortMode.reverseCreated),
+                      DropdownMenuEntry(
+                          label: 'modified (desc)', value: _SortMode.modified),
+                      DropdownMenuEntry(
+                          label: 'modified (asc)',
+                          value: _SortMode.reverseModified),
+                    ],
+                    requestFocusOnTap: false,
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                    ),
+                    initialSelection: sort.value,
+                    inputDecorationTheme:
+                        const InputDecorationTheme(isDense: true),
+                    label: const Text("Sort"),
+                    trailingIcon: const Icon(Icons.sort),
+                    onSelected: (v) {
+                      sort.value = v!;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                DropdownMenu(
+                  width: 130,
+                  requestFocusOnTap: false,
+                  dropdownMenuEntries: [
+                    for (final e in baseRoleNames.entries)
+                      DropdownMenuEntry(label: e.value, value: e.key)
+                  ],
+                  label: const Text("Node role"),
+                  textStyle: const TextStyle(
+                    fontSize: 12,
+                  ),
+                  initialSelection: currentPage,
+                  inputDecorationTheme:
+                      const InputDecorationTheme(isDense: true),
+                  onSelected: (value) {
+                    setState(() {
+                      currentPage = value!;
+                      _pageController.jumpToPage(currentPage.index);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                label: Text('Search (fuzzy)'),
+                isDense: true),
           ),
           const Divider(),
           Expanded(
             child: PageView.builder(
                 controller: _pageController,
                 itemBuilder: (context, idx) {
-                  return ChangeNotifierProvider.value(
-                      value: widget.core,
-                      child: KnowledgePage(role: currentPage));
+                  return MultiProvider(providers: [
+                    ChangeNotifierProvider.value(value: widget.core),
+                    ChangeNotifierProvider.value(value: sort),
+                    ChangeNotifierProvider.value(value: _searchController)
+                  ], child: KnowledgePage(role: currentPage));
                 },
                 itemCount: BaseRole.values.length),
           )
@@ -170,12 +232,136 @@ class _KnowledgePageState extends State<KnowledgePage> {
     final ctx = core.rpContext;
     return ChangeNotifierProvider.value(
       value: ctx,
-      child: Consumer<RPContext>(builder: (context, rp, _) {
+      child:
+          Consumer3<RPContext, ValueNotifier<_SortMode>, TextEditingController>(
+              builder: (context, rp, sort, search, _) {
         getNodes(context);
+        var nodesSorted = nodes;
+        if (search.value.text.isNotEmpty) {
+          final extraction = fw.extractAll(
+            query: search.value.text,
+            choices: nodesSorted,
+            getter: (node) => node.name,
+            cutoff: 60,
+          );
+          nodesSorted = extraction.map((e) => e.choice).toList();
+        }
+        switch (sort.value) {
+          case _SortMode.alphabetical:
+            nodesSorted.sort((a, b) => a.name.compareTo(b.name));
+          case _SortMode.reverseAlphabetical:
+            nodesSorted.sort((a, b) => b.name.compareTo(a.name));
+          case _SortMode.created:
+            nodesSorted.sort((a, b) {
+              if (a.created == null && b.created == null) return 0;
+              if (a.created == null) return 1;
+              if (b.created == null) return -1;
+              return a.created!.compareTo(b.created!);
+            });
+          case _SortMode.reverseCreated:
+            nodesSorted.sort((a, b) {
+              if (a.created == null && b.created == null) return 0;
+              if (a.created == null) return 1;
+              if (b.created == null) return -1;
+              return b.created!.compareTo(a.created!);
+            });
+          case _SortMode.modified:
+            nodesSorted.sort((a, b) {
+              if (a.modified == null && b.modified == null) return 0;
+              if (a.modified == null) return 1;
+              if (b.modified == null) return -1;
+              return a.modified!.compareTo(b.modified!);
+            });
+          case _SortMode.reverseModified:
+            nodesSorted.sort((a, b) {
+              if (a.modified == null && b.modified == null) return 0;
+              if (a.modified == null) return 1;
+              if (b.modified == null) return -1;
+              return b.modified!.compareTo(a.modified!);
+            });
+        }
+
         return Column(
           children: [
             if (nodes.isEmpty) Text('No nodes (${name()})'),
-            for (final node in nodes) Text('ID: ${node.id} Name: ${node.name}')
+            for (final node in nodesSorted)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('ID: ${node.id}',
+                                style: const TextStyle(fontSize: 10)),
+                            Text(node.name),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton.outlined(
+                        onPressed: () {},
+                        icon: const Icon(Icons.edit),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.outlined(
+                        // Fork
+                        onPressed: () {},
+                        icon: const Icon(Icons.alt_route),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.outlined(
+                        // Export
+                        onPressed: () {},
+                        icon: const Icon(Icons.upgrade),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.outlined(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Delete'),
+                                content: Text(
+                                    'Are you sure you want to delete ${node.name}?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      rp.deleteNode(node);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.delete),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      const SizedBox(width: 16),
+                      const CircleAvatar(radius: 16),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
+              )
+            // Text('ID: ${node.id} Name: ${node.name} '
+            // 'Created: ${(node.created != null) ? formatDateTime1(node.created!) : null}')
           ],
         );
       }),

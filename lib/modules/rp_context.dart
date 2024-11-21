@@ -10,8 +10,6 @@ class RPContext extends ChangeNotifier {
   late final Box<BaseNode> baseNodes;
   late final Box<AttributeComponent> attributes;
 
-  final List<BaseNode> activeContext = [];
-
   static Future<RPContext> create(MoonieCore core) async {
     final ctx = RPContext(core);
     ctx.baseNodes = ctx.store.box<BaseNode>();
@@ -35,6 +33,11 @@ class RPContext extends ChangeNotifier {
     node.id = baseNodes.put(node);
     notifyListeners();
     return node;
+  }
+
+  void deleteNode(BaseNode node) {
+    baseNodes.remove(node.id);
+    notifyListeners();
   }
 
   /// Not to be called directly exccept by BaseNode
