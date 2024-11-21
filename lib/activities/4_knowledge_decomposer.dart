@@ -463,6 +463,15 @@ class _KnowledgeDecomposerWidgetState extends State<KnowledgeDecomposerWidget> {
                         'Note - this can be fairly token intensive because it passes the entire card in as context repeatedly.'
                         'Advise use on local model if possible. Generally a large context size (>4096) is not necessary (depending on card size).'),
                   ),
+                  const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Note 2: ' +
+                          '''
+the more I use this the more I'm convinced it's not actually that useful.
+It's a fun trick but suffers from a few drawbacks.
+1. The LLMs have too much of a tendency to summarize character contents, losing important information. If you're willing to write your own nodes it's preferable in almost every case.
+2. You don't really gain that much compared to just copying and pasting the text into appropriate fields manually.
+''')),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

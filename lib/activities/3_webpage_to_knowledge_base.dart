@@ -117,6 +117,13 @@ class _WebpageToKnowledgeBaseState extends State<WebpageToKnowledgeBase> {
       controller: controller,
       children: [
         Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+                'Note: the main bottleneck here is context length/webpage size especially for local models. A lot of webpages are filled with irrelevant text in the HTML -- so a more sophisticated version of this likely needs a vector database or something'),
+          ),
+        ),
+        Card(
             child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
