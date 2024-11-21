@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/core.dart';
+import 'package:moonie/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';
 
 /// Maintains the nodes in active context and disk storage.
@@ -38,6 +39,15 @@ class RPContext extends ChangeNotifier {
   void deleteNode(BaseNode node) {
     baseNodes.remove(node.id);
     notifyListeners();
+  }
+
+  List<BaseNode> queryNodes(BaseRole role) {
+    final query = baseNodes.query(BaseNode_.role.equals(role.index));
+    final res = query.build().find();
+    for (final node in res) {
+      node.context = this;
+    }
+    return res;
   }
 
   /// Not to be called directly exccept by BaseNode
@@ -92,6 +102,16 @@ class BaseNode extends ChangeNotifier {
   DateTime? created;
   @Property(type: PropertyType.date)
   DateTime? modified;
+
+  // Do we need multiple of these?
+  String _imagePath = '';
+
+  String get imagePath => _imagePath;
+  set imagePath(String value) {
+    _imagePath = value;
+    modified = DateTime.now();
+    notifyListeners();
+  }
 
   String get name => _name;
   set name(String value) {

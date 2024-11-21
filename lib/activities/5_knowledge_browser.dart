@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/activity.dart';
+import 'package:moonie/activities/knowledge_browser/node_editor.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/objectbox.g.dart';
@@ -111,7 +112,7 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
                     for (final e in baseRoleNames.entries)
                       DropdownMenuEntry(label: e.value, value: e.key)
                   ],
-                  label: const Text("Node role"),
+                  label: const Text("Role"),
                   textStyle: const TextStyle(
                     fontSize: 12,
                   ),
@@ -221,9 +222,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
   void getNodes(BuildContext context) {
     final core = Provider.of<MoonieCore>(context, listen: false);
     final ctx = core.rpContext;
-    final query = ctx.baseNodes.query(BaseNode_.role.equals(widget.role.index));
     // Is synchronously doing this going to be a problem?
-    nodes = query.build().find();
+    nodes = ctx.queryNodes(widget.role);
   }
 
   @override
@@ -285,80 +285,93 @@ class _KnowledgePageState extends State<KnowledgePage> {
           children: [
             if (nodes.isEmpty) Text('No nodes (${name()})'),
             for (final node in nodesSorted)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 100,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('ID: ${node.id}',
-                                style: const TextStyle(fontSize: 10)),
-                            Text(node.name),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton.outlined(
-                        onPressed: () {},
-                        icon: const Icon(Icons.edit),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.outlined(
-                        // Fork
-                        onPressed: () {},
-                        icon: const Icon(Icons.alt_route),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.outlined(
-                        // Export
-                        onPressed: () {},
-                        icon: const Icon(Icons.upgrade),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.outlined(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Delete'),
-                                content: Text(
-                                    'Are you sure you want to delete ${node.name}?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      rp.deleteNode(node);
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Delete'),
-                                  ),
-                                ],
+              ChangeNotifierProvider.value(
+                value: node,
+                child: Consumer<BaseNode>(builder: (context, node, _) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('ID: ${node.id}',
+                                    style: const TextStyle(fontSize: 10)),
+                                Text(node.name),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                          IconButton.outlined(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    ChangeNotifierProvider.value(
+                                  value: core,
+                                  child: NodeEditor(node: node),
+                                ),
+                              ));
+                            },
+                            icon: const Icon(Icons.edit),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            // Fork
+                            onPressed: () {},
+                            icon: const Icon(Icons.alt_route),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            // Export
+                            onPressed: () {},
+                            icon: const Icon(Icons.upgrade),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Delete'),
+                                    content: Text(
+                                        'Are you sure you want to delete ${node.name}?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          rp.deleteNode(node);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                        icon: const Icon(Icons.delete),
-                        visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.delete),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 16),
+                          const CircleAvatar(radius: 16),
+                          const SizedBox(width: 8),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      const CircleAvatar(radius: 16),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                }),
               )
             // Text('ID: ${node.id} Name: ${node.name} '
             // 'Created: ${(node.created != null) ? formatDateTime1(node.created!) : null}')

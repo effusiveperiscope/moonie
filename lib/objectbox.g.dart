@@ -69,7 +69,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 7450678709023556741),
       name: 'BaseNode',
-      lastPropertyId: const obx_int.IdUid(6, 2238188088287426116),
+      lastPropertyId: const obx_int.IdUid(7, 657730921674049911),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -101,6 +101,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(6, 2238188088287426116),
             name: 'modified',
             type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 657730921674049911),
+            name: 'imagePath',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -223,13 +228,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectToFB: (BaseNode object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
           final descriptionOffset = fbb.writeString(object.description);
-          fbb.startTable(7);
+          final imagePathOffset = fbb.writeString(object.imagePath);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.role);
           fbb.addOffset(2, nameOffset);
           fbb.addOffset(3, descriptionOffset);
           fbb.addInt64(4, object.created?.millisecondsSinceEpoch);
           fbb.addInt64(5, object.modified?.millisecondsSinceEpoch);
+          fbb.addOffset(6, imagePathOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -252,7 +259,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 : DateTime.fromMillisecondsSinceEpoch(createdValue)
             ..modified = modifiedValue == null
                 ? null
-                : DateTime.fromMillisecondsSinceEpoch(modifiedValue);
+                : DateTime.fromMillisecondsSinceEpoch(modifiedValue)
+            ..imagePath = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 16, '');
 
           return object;
         })
@@ -320,4 +329,8 @@ class BaseNode_ {
   /// See [BaseNode.modified].
   static final modified =
       obx.QueryDateProperty<BaseNode>(_entities[1].properties[5]);
+
+  /// See [BaseNode.imagePath].
+  static final imagePath =
+      obx.QueryStringProperty<BaseNode>(_entities[1].properties[6]);
 }

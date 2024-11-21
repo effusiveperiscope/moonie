@@ -50,7 +50,7 @@
     },
     {
       "id": "3:7450678709023556741",
-      "lastPropertyId": "6:2238188088287426116",
+      "lastPropertyId": "7:657730921674049911",
       "name": "BaseNode",
       "properties": [
         {
@@ -83,6 +83,11 @@
           "id": "6:2238188088287426116",
           "name": "modified",
           "type": 10
+        },
+        {
+          "id": "7:657730921674049911",
+          "name": "imagePath",
+          "type": 9
         }
       ],
       "relations": []
