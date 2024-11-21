@@ -50,7 +50,7 @@
     },
     {
       "id": "3:7450678709023556741",
-      "lastPropertyId": "4:706878819240799355",
+      "lastPropertyId": "6:2238188088287426116",
       "name": "BaseNode",
       "properties": [
         {
@@ -73,6 +73,16 @@
           "id": "4:706878819240799355",
           "name": "description",
           "type": 9
+        },
+        {
+          "id": "5:6056420063037614984",
+          "name": "created",
+          "type": 10
+        },
+        {
+          "id": "6:2238188088287426116",
+          "name": "modified",
+          "type": 10
         }
       ],
       "relations": []

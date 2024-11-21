@@ -69,7 +69,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 7450678709023556741),
       name: 'BaseNode',
-      lastPropertyId: const obx_int.IdUid(4, 706878819240799355),
+      lastPropertyId: const obx_int.IdUid(6, 2238188088287426116),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -91,6 +91,16 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(4, 706878819240799355),
             name: 'description',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 6056420063037614984),
+            name: 'created',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 2238188088287426116),
+            name: 'modified',
+            type: 10,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -213,25 +223,36 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectToFB: (BaseNode object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
           final descriptionOffset = fbb.writeString(object.description);
-          fbb.startTable(5);
+          fbb.startTable(7);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.role);
           fbb.addOffset(2, nameOffset);
           fbb.addOffset(3, descriptionOffset);
+          fbb.addInt64(4, object.created?.millisecondsSinceEpoch);
+          fbb.addInt64(5, object.modified?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-
+          final createdValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
+          final modifiedValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 14);
           final object = BaseNode()
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
             ..role = const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0)
             ..name = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 8, '')
             ..description = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 10, '');
+                .vTableGet(buffer, rootOffset, 10, '')
+            ..created = createdValue == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(createdValue)
+            ..modified = modifiedValue == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(modifiedValue);
 
           return object;
         })
@@ -291,4 +312,12 @@ class BaseNode_ {
   /// See [BaseNode.description].
   static final description =
       obx.QueryStringProperty<BaseNode>(_entities[1].properties[3]);
+
+  /// See [BaseNode.created].
+  static final created =
+      obx.QueryDateProperty<BaseNode>(_entities[1].properties[4]);
+
+  /// See [BaseNode.modified].
+  static final modified =
+      obx.QueryDateProperty<BaseNode>(_entities[1].properties[5]);
 }

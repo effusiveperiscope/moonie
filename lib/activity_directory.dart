@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activities/3_webpage_to_knowledge_base.dart';
 import 'package:moonie/activities/4_knowledge_decomposer.dart';
+import 'package:moonie/activities/5_knowledge_browser.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
@@ -15,6 +16,7 @@ class ActivityDirectory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<ActivityWidget> activities = [
+      KnowledgeBrowser(core: core),
       Chat2Widget(core: core),
       WebpageToKnowledgeBase(core: core),
       KnowledgeDecomposerWidget(core: core)
@@ -43,17 +45,23 @@ class ActivityDirectory extends StatelessWidget {
                         ],
                         title: Row(
                           children: [
-                            SizedBox(width: 100, child: Text(activity.name)),
-                            const Spacer(),
-                            ChangeNotifierProvider.value(
-                              value: core.settings,
-                              child: Consumer<Settings>(
-                                  builder: (context, settings, _) {
-                                return Expanded(
-                                  child: core.interface.infoWidget(core),
-                                );
-                              }),
-                            )
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                    child: Text(
+                                  activity.name,
+                                  style: const TextStyle(fontSize: 16),
+                                )),
+                                ChangeNotifierProvider.value(
+                                  value: core.settings,
+                                  child: Consumer<Settings>(
+                                      builder: (context, settings, _) {
+                                    return core.interface.infoWidget(core);
+                                  }),
+                                )
+                              ],
+                            ),
                           ],
                         )),
                     body: activity,

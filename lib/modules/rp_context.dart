@@ -31,10 +31,13 @@ class RPContext extends ChangeNotifier {
     node.name = name;
     node.description = description;
     node.context = this;
+    node.created = DateTime.now();
     node.id = baseNodes.put(node);
+    notifyListeners();
     return node;
   }
 
+  /// Not to be called directly exccept by BaseNode
   AttributeComponent createAttribute(String name, String content,
       {String description = ''}) {
     final attr = AttributeComponent();
@@ -57,8 +60,18 @@ enum BaseRole {
   user,
   world,
   writingRules,
+  item,
   extra,
 }
+
+const baseRoleNames = {
+  BaseRole.character: 'Character',
+  BaseRole.user: 'User',
+  BaseRole.world: 'World',
+  BaseRole.writingRules: 'Writing Rules',
+  BaseRole.item: 'Item',
+  BaseRole.extra: 'Extra',
+};
 
 // Might hold things like RPG stats, not sure
 enum SpecialAttributeType { exampleMessages }
@@ -69,8 +82,27 @@ class BaseNode extends ChangeNotifier {
   int id = 0;
 
   int role = BaseRole.extra.index;
-  String name = '';
-  String description = '';
+  String _name = '';
+  String _description = '';
+
+  @Property(type: PropertyType.date)
+  DateTime? created;
+  @Property(type: PropertyType.date)
+  DateTime? modified;
+
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    modified = DateTime.now();
+    notifyListeners();
+  }
+
+  String get description => _description;
+  set description(String value) {
+    _description = value;
+    modified = DateTime.now();
+    notifyListeners();
+  }
 
   @override
   void notifyListeners() {
