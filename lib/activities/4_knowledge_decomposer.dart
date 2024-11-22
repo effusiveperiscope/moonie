@@ -8,6 +8,7 @@ import 'package:moonie/activities/activity.dart';
 import 'package:moonie/activities/knowledge_decomposition/prompts.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
+import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
 import 'package:moonie/widgets/stopwatch.dart';
 import 'package:provider/provider.dart';
