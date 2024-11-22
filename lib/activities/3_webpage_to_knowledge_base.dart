@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/2_chat2.dart';
-import 'package:dio/dio.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/cookie.dart';
 import 'package:moonie/utils.dart';
@@ -116,7 +115,7 @@ class _WebpageToKnowledgeBaseState extends State<WebpageToKnowledgeBase> {
       core: widget.core,
       controller: controller,
       children: [
-        Card(
+        const Card(
           child: Padding(
             padding: EdgeInsets.all(8),
             child: Text(

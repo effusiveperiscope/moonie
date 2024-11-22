@@ -5,7 +5,6 @@ import 'package:moonie/activities/4_knowledge_decomposer.dart';
 import 'package:moonie/activities/5_knowledge_browser.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
-import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:provider/provider.dart';
 

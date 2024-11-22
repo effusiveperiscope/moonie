@@ -6,7 +6,6 @@ import 'package:moonie/objectbox.g.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 class MoonieCore extends ChangeNotifier {
   late final Settings settings;
@@ -32,7 +31,7 @@ class MoonieCore extends ChangeNotifier {
     }
     core.settingsUpdatedHook();
 
-    final docsDir = await getApplicationDocumentsDirectory();
+    //final docsDir = await getApplicationDocumentsDirectory();
     //core.store = openStore(directory: p.join(docsDir.path, moonieCoreFolder));
     core.store = openStore();
 

@@ -255,8 +255,6 @@ class KnowledgeDecomposer extends ChangeNotifier {
   // Then extracts information on each.
   // For longer documents we probably want something paginated/gist-like like horsona uses?
   Future<List<BaseNode>> handleCharacterRole(String input) async {
-    final ifc = core.interface;
-
     // TODO Eventually we should somehow move all of these into a
     // programmatic tree structure - so we can recalculate parts of the
     // knowledge nodes and update dependent parts of the graph at will

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:langchain_openai/src/chat_models/chat_openai.dart';
 import 'package:langchain_openai/src/chat_models/types.dart';

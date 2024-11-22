@@ -5,8 +5,6 @@ import 'package:moonie/activities/activity.dart';
 import 'package:moonie/activities/knowledge_browser/node_editor.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
-import 'package:moonie/objectbox.g.dart';
-import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fw;
 
@@ -47,7 +45,6 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(

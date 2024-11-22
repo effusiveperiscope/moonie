@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:langchain_openai/langchain_openai.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/llm_interfaces/openai.dart';
@@ -100,7 +99,6 @@ class _SettingsPageState extends State<SettingsPage> {
   late final TextEditingController _openAiKeyController;
   late final TextEditingController _openAiEndpointController;
   late final PageController _pageController;
-  LLMInterfaceType _llmInterfaceType = LLMInterfaceType.openrouter;
 
   @override
   void initState() {
@@ -161,8 +159,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ],
                               onChanged: (v) {
                                 setState(() {
-                                  _llmInterfaceType = v!;
-                                  widget.settings.interfaceType = v;
+                                  widget.settings.interfaceType = v!;
                                   _pageController.jumpToPage(v.index);
                                 });
                               })
