@@ -5,7 +5,6 @@ import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/objectbox.g.dart';
 import 'package:moonie/llm_interfaces/openrouter.dart';
 import 'package:moonie/settings.dart';
-import 'package:path_provider/path_provider.dart';
 
 class MoonieCore extends ChangeNotifier {
   late final Settings settings;

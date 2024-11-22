@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:moonie/core.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-const String imagesDirName = 'moonie/images';
+final String imagesDirName = p.join(MoonieCore.moonieCoreFolder, 'images');
 
 Future<File> copyImageToImagesDir(String path) async {
   final directory = await getApplicationDocumentsDirectory();
