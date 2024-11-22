@@ -92,94 +92,96 @@ class _NodeEditorState extends State<NodeEditor> {
         child: ChangeNotifierProvider.value(
           value: widget.node,
           child: Consumer<BaseNode>(builder: (context, node, _) {
-            return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                  'Created: ${(node.created == null) ? 'null' : formatDateTime1(node.created!)}'),
-                              const SizedBox(height: 8),
-                              Text(
-                                  'Modified: ${(node.modified == null) ? 'null' : formatDateTime1(node.modified!)}'),
-                              const SizedBox(height: 16),
-                              TextField(
-                                controller: descriptionController,
-                                style: const TextStyle(fontSize: 12),
-                                maxLines: 3,
-                                onChanged: (value) => setState(() {
-                                  node.description = value;
-                                }),
-                                decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    label: Text("Meta description"),
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.always),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  ActionChip(
-                                    label: const Icon(Icons.add, size: 20),
-                                    visualDensity: VisualDensity.compact,
-                                    onPressed: () {
-                                      showAddAttributeDialog();
-                                    },
-                                  )
-                                ],
-                              )
-                            ],
+            return SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                    'Created: ${(node.created == null) ? 'null' : formatDateTime1(node.created!)}'),
+                                const SizedBox(height: 8),
+                                Text(
+                                    'Modified: ${(node.modified == null) ? 'null' : formatDateTime1(node.modified!)}'),
+                                const SizedBox(height: 16),
+                                TextField(
+                                  controller: descriptionController,
+                                  style: const TextStyle(fontSize: 12),
+                                  maxLines: 3,
+                                  onChanged: (value) => setState(() {
+                                    node.description = value;
+                                  }),
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      label: Text("Meta description"),
+                                      floatingLabelBehavior:
+                                          FloatingLabelBehavior.always),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    ActionChip(
+                                      label: const Icon(Icons.add, size: 20),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: () {
+                                        showAddAttributeDialog();
+                                      },
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 2,
-                        child: CroppableImage(
-                          height: 200,
-                          controller: controller,
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: CroppableImage(
+                            height: 200,
+                            controller: controller,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    const Text('Attributes:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ReorderableListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) =>
+                          ChangeNotifierProvider.value(
+                        key: Key(
+                            node.getAttributeByPosition(index).id.toString()),
+                        value: node,
+                        child: AttributeDisplay(
+                          attr: node.getAttributeByPosition(index),
                         ),
                       ),
-                    ],
-                  ),
-                  const Divider(),
-                  const Text('Attributes:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  ReorderableListView.builder(
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) =>
-                        ChangeNotifierProvider.value(
-                      key:
-                          Key(node.getAttributeByPosition(index).id.toString()),
-                      value: node,
-                      child: AttributeDisplay(
-                        attr: node.getAttributeByPosition(index),
+                      itemCount: node.length(),
+                      onReorder: (oldIndex, newIndex) => setState(() {
+                        node.moveAttribute(oldIndex, newIndex);
+                      }),
+                    ),
+                    if (node.getAttributes().isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('No attributes'),
                       ),
-                    ),
-                    itemCount: node.length(),
-                    onReorder: (oldIndex, newIndex) => setState(() {
-                      node.moveAttribute(oldIndex, newIndex);
-                    }),
-                  ),
-                  if (node.getAttributes().isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('No attributes'),
-                    ),
-                  ...suggestedAttributes(context)
-                ]);
+                    ...suggestedAttributes(context)
+                  ]),
+            );
           }),
         ),
       ),

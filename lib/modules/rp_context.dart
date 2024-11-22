@@ -221,6 +221,7 @@ class BaseNode extends ChangeNotifier {
     newNode.description = description;
     newNode.imagePath = imagePath;
     newNode.id = context!.baseNodes.put(newNode);
+    newNode.created = DateTime.now();
     newNode.context = context!;
     for (final attr in getAttributes()) {
       newNode.attributes.add(attr.copy(null, newNode));
