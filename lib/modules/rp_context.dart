@@ -213,9 +213,26 @@ class BaseNode extends ChangeNotifier {
   }
 
   BaseNode();
+
+  BaseNode copy() {
+    final newNode = BaseNode();
+    newNode.role = role;
+    newNode.name = name;
+    newNode.description = description;
+    newNode.imagePath = imagePath;
+    newNode.id = context!.baseNodes.put(newNode);
+    newNode.context = context!;
+    for (final attr in getAttributes()) {
+      newNode.attributes.add(attr.copy(null, newNode));
+    }
+    context!.notifyListeners();
+    return newNode;
+  }
 }
 
-/// An attribute, typically of a base node (can also be a tree structure).
+/// An attribute, typically of a base node.
+/// Theoretically this can support a tree structure
+/// but that hasn't been properly implemented and I'm not sure how useful it is.
 @Entity()
 class AttributeComponent extends ChangeNotifier {
   int id = 0;
@@ -223,6 +240,8 @@ class AttributeComponent extends ChangeNotifier {
   int? _attributePosition;
 
   String _name = '';
+
+  /// Unused - may decide to get rid of it later as it's not very useful
   String _description = '';
   String _content = '';
 
@@ -292,4 +311,22 @@ class AttributeComponent extends ChangeNotifier {
   RPContext? context;
 
   AttributeComponent();
+
+  AttributeComponent copy(
+      AttributeComponent? aparent, BaseNode? abaseNodeParent) {
+    final newAttribute = AttributeComponent();
+    newAttribute.name = name;
+    newAttribute.description = description;
+    newAttribute.content = content;
+    newAttribute.attributePosition = attributePosition;
+    newAttribute.parent.target = aparent;
+    newAttribute.baseNodeParent.target = abaseNodeParent;
+    for (final child in getChildren()) {
+      newAttribute.children.add(child.copy(newAttribute, null));
+    }
+    newAttribute.id = context!.attributes.put(newAttribute);
+    newAttribute.context = context!;
+    context!.notifyListeners();
+    return newAttribute;
+  }
 }

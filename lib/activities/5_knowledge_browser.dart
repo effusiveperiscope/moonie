@@ -322,9 +322,11 @@ class _KnowledgePageState extends State<KnowledgePage> {
                           ),
                           const SizedBox(width: 8),
                           IconButton.outlined(
-                            // Fork
-                            onPressed: () {},
-                            icon: const Icon(Icons.alt_route),
+                            // Copy
+                            onPressed: () {
+                              node.copy();
+                            },
+                            icon: const Icon(Icons.copy),
                             visualDensity: VisualDensity.compact,
                           ),
                           const SizedBox(width: 8),
