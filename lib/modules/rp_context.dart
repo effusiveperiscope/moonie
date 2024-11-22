@@ -134,16 +134,46 @@ class BaseNode extends ChangeNotifier {
   }
 
   @Backlink('baseNodeParent')
-  ToMany<AttributeComponent> _attributes = ToMany();
+  final attributes = ToMany<AttributeComponent>();
 
   @Transient()
   RPContext? context;
 
   List<AttributeComponent> getAttributes() {
-    return _attributes.map((e) {
-      e.context = context;
+    return attributes.map((e) {
+      e.context = context!;
       return e;
     }).toList();
+  }
+
+  AttributeComponent getAttributeByPosition(int index) {
+    return attributes.singleWhere((e) => e.attributePosition == index);
+  }
+
+  int length() => attributes.length;
+
+  void moveAttribute(int from, int to) {
+    final attrs = attributes.toList();
+
+    // https://stackoverflow.com/questions/54162721/onreorder-arguments-in-flutter-reorderablelistview
+    if (from < to) {
+      to -= 1;
+    }
+
+    if (from < 0 ||
+        from >= attrs.length ||
+        to < 0 ||
+        to >= attrs.length ||
+        from == to) {
+      return; // Invalid indices or no movement needed
+    }
+
+    attrs.sort((a, b) => a.attributePosition!.compareTo(b.attributePosition!));
+    final attribute = attrs.removeAt(from);
+    attrs.insert(to, attribute);
+
+    refreshAttributePositions(override: attrs);
+    notifyListeners();
   }
 
   BaseRole getRole() {
@@ -156,12 +186,30 @@ class BaseNode extends ChangeNotifier {
   }
 
   void addAttribute(AttributeComponent attr) {
-    attr.context = context;
-    _attributes.add(attr);
+    attr.context = context!;
+    attr.setParent(this);
+    attributes.add(attr);
+    attr.attributePosition = attributes.length - 1;
+    refreshAttributePositions();
+    notifyListeners();
   }
 
   void removeAttribute(AttributeComponent attr) {
-    _attributes.remove(attr);
+    attributes.remove(attr);
+    refreshAttributePositions();
+    notifyListeners();
+  }
+
+  void refreshAttributePositions({List<AttributeComponent>? override}) {
+    final attrs = override ?? attributes.toList();
+    if (override == null) {
+      attrs
+          .sort((a, b) => a.attributePosition!.compareTo(b.attributePosition!));
+    }
+    for (var i = 0; i < attributes.length; i++) {
+      attrs[i].attributePosition = i;
+    }
+    notifyListeners();
   }
 
   BaseNode();
@@ -172,9 +220,35 @@ class BaseNode extends ChangeNotifier {
 class AttributeComponent extends ChangeNotifier {
   int id = 0;
 
-  String name = '';
-  String description = '';
-  String content = '';
+  int? _attributePosition;
+
+  String _name = '';
+  String _description = '';
+  String _content = '';
+
+  int? get attributePosition => _attributePosition;
+  set attributePosition(int? value) {
+    _attributePosition = value;
+    notifyListeners();
+  }
+
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
+  String get description => _description;
+  set description(String value) {
+    _description = value;
+    notifyListeners();
+  }
+
+  String get content => _content;
+  set content(String value) {
+    _content = value;
+    notifyListeners();
+  }
 
   @override
   void notifyListeners() {
@@ -182,10 +256,10 @@ class AttributeComponent extends ChangeNotifier {
     context?.attributes.put(this);
   }
 
-  ToOne<BaseNode> baseNodeParent = ToOne();
-  ToOne<AttributeComponent> parent = ToOne();
+  final baseNodeParent = ToOne<BaseNode>();
+  final parent = ToOne<AttributeComponent>();
   @Backlink('parent')
-  ToMany<AttributeComponent> children = ToMany();
+  final children = ToMany<AttributeComponent>();
 
   dynamic getParent() {
     final target = parent.target ?? baseNodeParent.target;
@@ -203,11 +277,13 @@ class AttributeComponent extends ChangeNotifier {
     } else if (p is BaseNode) {
       baseNodeParent.target = p;
     }
+    notifyListeners();
   }
 
   List<AttributeComponent> getChildren() {
     return children.map((e) {
-      e.context = context;
+      e.context = context!;
+      e.parent.target = this;
       return e;
     }).toList();
   }

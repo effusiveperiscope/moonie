@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/activities/knowledge_browser/node_editor.dart';
@@ -326,12 +328,12 @@ class _KnowledgePageState extends State<KnowledgePage> {
                             visualDensity: VisualDensity.compact,
                           ),
                           const SizedBox(width: 8),
-                          IconButton.outlined(
-                            // Export
-                            onPressed: () {},
-                            icon: const Icon(Icons.upgrade),
-                            visualDensity: VisualDensity.compact,
-                          ),
+                          // IconButton.outlined(
+                          //// Export
+                          // onPressed: () {},
+                          // icon: const Icon(Icons.upgrade),
+                          // visualDensity: VisualDensity.compact,
+                          // ),
                           const SizedBox(width: 8),
                           IconButton.outlined(
                             onPressed: () {
@@ -365,7 +367,12 @@ class _KnowledgePageState extends State<KnowledgePage> {
                             visualDensity: VisualDensity.compact,
                           ),
                           const SizedBox(width: 16),
-                          const CircleAvatar(radius: 16),
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundImage: (node.imagePath.isNotEmpty)
+                                ? FileImage(File(node.imagePath))
+                                : null,
+                          ),
                           const SizedBox(width: 8),
                         ],
                       ),

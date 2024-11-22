@@ -21,7 +21,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(2, 8781206216458749294),
       name: 'AttributeComponent',
-      lastPropertyId: const obx_int.IdUid(6, 7536571769663539683),
+      lastPropertyId: const obx_int.IdUid(7, 8639802489852452644),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -57,7 +57,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const obx_int.IdUid(2, 1641280788405409404),
-            relationTarget: 'AttributeComponent')
+            relationTarget: 'AttributeComponent'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 8639802489852452644),
+            name: 'attributePosition',
+            type: 6,
+            flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[
@@ -109,7 +114,12 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[])
+      backlinks: <obx_int.ModelBacklink>[
+        obx_int.ModelBacklink(
+            name: 'attributes',
+            srcEntity: 'AttributeComponent',
+            srcField: 'baseNodeParent')
+      ])
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -182,13 +192,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final nameOffset = fbb.writeString(object.name);
           final descriptionOffset = fbb.writeString(object.description);
           final contentOffset = fbb.writeString(object.content);
-          fbb.startTable(7);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addOffset(2, descriptionOffset);
           fbb.addOffset(3, contentOffset);
           fbb.addInt64(4, object.baseNodeParent.targetId);
           fbb.addInt64(5, object.parent.targetId);
+          fbb.addInt64(6, object.attributePosition);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -203,7 +214,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ..description = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 8, '')
             ..content = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 10, '');
+                .vTableGet(buffer, rootOffset, 10, '')
+            ..attributePosition = const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 16);
           object.baseNodeParent.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
           object.baseNodeParent.attach(store);
@@ -220,7 +233,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
     BaseNode: obx_int.EntityDefinition<BaseNode>(
         model: _entities[1],
         toOneRelations: (BaseNode object) => [],
-        toManyRelations: (BaseNode object) => {},
+        toManyRelations: (BaseNode object) => {
+              obx_int.RelInfo<AttributeComponent>.toOneBacklink(
+                  5,
+                  object.id,
+                  (AttributeComponent srcObject) =>
+                      srcObject.baseNodeParent): object.attributes
+            },
         getId: (BaseNode object) => object.id,
         setId: (BaseNode object, int id) {
           object.id = id;
@@ -262,7 +281,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 : DateTime.fromMillisecondsSinceEpoch(modifiedValue)
             ..imagePath = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 16, '');
-
+          obx_int.InternalToManyAccess.setRelInfo<BaseNode>(
+              object.attributes,
+              store,
+              obx_int.RelInfo<AttributeComponent>.toOneBacklink(5, object.id,
+                  (AttributeComponent srcObject) => srcObject.baseNodeParent));
           return object;
         })
   };
@@ -297,6 +320,10 @@ class AttributeComponent_ {
   static final parent =
       obx.QueryRelationToOne<AttributeComponent, AttributeComponent>(
           _entities[0].properties[5]);
+
+  /// See [AttributeComponent.attributePosition].
+  static final attributePosition =
+      obx.QueryIntegerProperty<AttributeComponent>(_entities[0].properties[6]);
 
   /// see [AttributeComponent.children]
   static final children =
@@ -333,4 +360,9 @@ class BaseNode_ {
   /// See [BaseNode.imagePath].
   static final imagePath =
       obx.QueryStringProperty<BaseNode>(_entities[1].properties[6]);
+
+  /// see [BaseNode.attributes]
+  static final attributes =
+      obx.QueryBacklinkToMany<AttributeComponent, BaseNode>(
+          AttributeComponent_.baseNodeParent);
 }

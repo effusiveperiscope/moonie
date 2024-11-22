@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:8781206216458749294",
-      "lastPropertyId": "6:7536571769663539683",
+      "lastPropertyId": "7:8639802489852452644",
       "name": "AttributeComponent",
       "properties": [
         {
@@ -44,6 +44,11 @@
           "flags": 520,
           "indexId": "2:1641280788405409404",
           "relationTarget": "AttributeComponent"
+        },
+        {
+          "id": "7:8639802489852452644",
+          "name": "attributePosition",
+          "type": 6
         }
       ],
       "relations": []
