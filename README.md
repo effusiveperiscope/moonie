@@ -6,8 +6,13 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 - Need to decompose information into proper **nodes** that can be hotswapped 
 
 ## Terminology
-- A **base node** is a unit of information that the user can hotswap for roleplay context
-- An **attribute** can be attached to a node, providing further information on that node
+- A **base node** is a unit of information that the user can hotswap for roleplay context, such as a character.
+- An **attribute** can be attached to a node, providing further information on that node.
+
+- A **scenario** is analogous to a SillyTavern card, and can contain multiple **chats**.
+- Each scenario may define multiple **slots**, which can accept one or more base nodes via a **slot fill**. 
+- Slot fills are local to each chat, but a slot may specify a default slot fill.
+
 - The **primary AI call** is the AI call that is made after all preprocessors have been executed.
 - A **module** is anything that operates on inputs or outputs in the context of a roleplay.
 - A **preprocessor** is any module that attaches context to the system after the user input is submitted (before the primary AI call).
