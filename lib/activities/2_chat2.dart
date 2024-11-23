@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
@@ -7,73 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_selectionarea/flutter_markdown.dart';
 import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/activity.dart';
+import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/llm_interfaces/llm.dart';
 import 'package:moonie/settings.dart';
 import 'package:moonie/utils.dart';
 import 'package:provider/provider.dart';
 
-class Chat2Message {
-  ChatMessageType type;
-  String text;
-  bool complete = false;
-
-  String? model;
-  String? imageFile;
-  String? imageBase64;
-
-  Chat2Message(
-      {this.type = ChatMessageType.human, required String text, this.imageFile})
-      : text = text {
-    prepareImage();
-  }
-
-  void prepareImage() {
-    if (imageFile != null) {
-      imageBase64 = base64.encode(File(imageFile!).readAsBytesSync());
-    }
-  }
-
-  ChatMessage message() {
-    switch (type) {
-      case ChatMessageType.ai:
-        return ChatMessage.ai(text);
-      case ChatMessageType.human:
-        return ChatMessage.human(ChatMessageContent.multiModal([
-          ChatMessageContent.text(text),
-          if (imageFile != null)
-            ChatMessageContent.image(
-                mimeType: imageMimeFromFilePath(imageFile!),
-                data: imageBase64!),
-        ]));
-      case ChatMessageType.system:
-        return ChatMessage.system(text);
-      default:
-        return ChatMessage.human(ChatMessageContent.text(text));
-    }
-  }
-
-  String name({bool showModel = false}) {
-    switch (type) {
-      case ChatMessageType.ai:
-        if (showModel) {
-          return 'AI ($model)';
-        } else {
-          return 'AI';
-        }
-      case ChatMessageType.human:
-        return 'You';
-      case ChatMessageType.system:
-        return 'System';
-      default:
-        return 'Unknown';
-    }
-  }
-}
-
 class Chat2Controller extends ChangeNotifier {
   final MoonieCore core;
-  List<Chat2Message> messages = [];
+  List<RPChatMessage> messages = [];
   bool _busy = false;
   String errorMessage = '';
   CancelableOperation? _future;
@@ -112,8 +54,11 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Chat2Message> sysPrompt() {
-    return [Chat2Message(type: ChatMessageType.system, text: baseSystemPrompt)];
+  List<RPChatMessage> sysPrompt() {
+    return [
+      RPChatMessage.ephemeral(
+          type: ChatMessageType.system, text: baseSystemPrompt)
+    ];
   }
 
   bool useStreamingOutputs() {
@@ -129,7 +74,7 @@ class Chat2Controller extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMessage(Chat2Message message) async {
+  Future<void> sendMessage(RPChatMessage message) async {
     busy = true;
     final chain = buildChain();
 
@@ -169,7 +114,8 @@ class Chat2Controller extends ChangeNotifier {
   Future<void> nonStreamInvoke(Runnable chain, PromptValue prompt) async {
     try {
       final res = await chain.invoke(prompt);
-      final mes = Chat2Message(type: ChatMessageType.ai, text: res as String);
+      final mes = RPChatMessage.ephemeral(
+          type: ChatMessageType.ai, text: res as String);
       mes.complete = true;
       updateWithMessage(mes);
       notifyListeners();
@@ -182,7 +128,7 @@ class Chat2Controller extends ChangeNotifier {
   }
 
   Future<void> streamInvoke(Runnable chain, PromptValue prompt) async {
-    final mes = Chat2Message(type: ChatMessageType.ai, text: '');
+    final mes = RPChatMessage.ephemeral(type: ChatMessageType.ai, text: '');
     try {
       busy = true;
       updateWithMessage(mes);
@@ -203,13 +149,13 @@ class Chat2Controller extends ChangeNotifier {
     }
   }
 
-  void updateWithMessage(Chat2Message message) {
+  void updateWithMessage(RPChatMessage message) {
     message.model = ifc.currentModel();
     message.complete = false;
     messages.add(message);
   }
 
-  void removeMessages(Chat2Message message) async {
+  void removeMessages(RPChatMessage message) async {
     int index = messages.lastIndexWhere((element) => element == message);
     if (index == -1) {
       return;
@@ -233,7 +179,7 @@ class Chat2Controller extends ChangeNotifier {
     return openai | const StringOutputParser();
   }
 
-  Future<void> retryMessage(Chat2Message? lastMessage) async {
+  Future<void> retryMessage(RPChatMessage? lastMessage) async {
     try {
       if (lastMessage != null) {
         removeMessages(lastMessage);
@@ -259,7 +205,7 @@ class Chat2Controller extends ChangeNotifier {
 }
 
 class _MessageWidget extends StatefulWidget {
-  final Chat2Message message;
+  final RPChatMessage message;
   final Chat2Controller controller;
   const _MessageWidget({required this.message, required this.controller});
 
@@ -609,7 +555,7 @@ class _Chat2WidgetState extends State<Chat2Widget> {
       } else {
         invocationCallback = () async {
           if (textController.text.isNotEmpty) {
-            final mes = Chat2Message(
+            final mes = RPChatMessage.ephemeral(
                 type: ChatMessageType.human,
                 text: textController.text,
                 imageFile: imageFile);

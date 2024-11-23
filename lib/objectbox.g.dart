@@ -9,13 +9,13 @@
 import 'dart:typed_data';
 
 import 'package:flat_buffers/flat_buffers.dart' as fb;
-import 'package:moonie/modules/rp_entities.dart';
-import 'package:moonie/modules/rp_entities.dart';
 import 'package:objectbox/internal.dart'
     as obx_int; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart' as obx;
 
-import 'modules/rp_context.dart';
+import 'activities/roleplay/chat_entities.dart';
+import 'modules/rp_entities.dart';
+import 'modules/scenario.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -121,7 +121,124 @@ final _entities = <obx_int.ModelEntity>[
             name: 'attributes',
             srcEntity: 'AttributeComponent',
             srcField: 'baseNodeParent')
-      ])
+      ]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(4, 3282090211557049256),
+      name: 'RPChat',
+      lastPropertyId: const obx_int.IdUid(2, 8091468834881721331),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 7152136574589467017),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8091468834881721331),
+            name: 'created',
+            type: 10,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[
+        obx_int.ModelBacklink(
+            name: 'messages', srcEntity: 'RPChatMessage', srcField: 'chat')
+      ]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(5, 511921411842288960),
+      name: 'RPChatMessage',
+      lastPropertyId: const obx_int.IdUid(8, 8056134531063793538),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 78964320017614895),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 625961826070715997),
+            name: 'chatId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(3, 5906729401673455253),
+            relationTarget: 'RPChat'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 3396515535393987406),
+            name: 'type',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 5401280511708130726),
+            name: 'text',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 8244150442921025964),
+            name: 'complete',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 5398496801857295952),
+            name: 'model',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 1773150720023693248),
+            name: 'imageFile',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 8056134531063793538),
+            name: 'imageBase64',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(6, 3437152827243650063),
+      name: 'Scenario',
+      lastPropertyId: const obx_int.IdUid(6, 6322375816734078315),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 867616263981151958),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 840811417770736007),
+            name: 'created',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 6790151879368114499),
+            name: 'modified',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 4129207706312321032),
+            name: 'name',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 6971865851957906699),
+            name: 'description',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 6322375816734078315),
+            name: 'imagePath',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(1, 7681578514651760447),
+            name: 'nodes',
+            targetId: const obx_int.IdUid(3, 7450678709023556741))
+      ],
+      backlinks: <obx_int.ModelBacklink>[])
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -158,9 +275,9 @@ obx.Store openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(3, 7450678709023556741),
-      lastIndexId: const obx_int.IdUid(2, 1641280788405409404),
-      lastRelationId: const obx_int.IdUid(0, 0),
+      lastEntityId: const obx_int.IdUid(6, 3437152827243650063),
+      lastIndexId: const obx_int.IdUid(3, 5906729401673455253),
+      lastRelationId: const obx_int.IdUid(1, 7681578514651760447),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [100189409228318002],
       retiredIndexUids: const [],
@@ -289,6 +406,146 @@ obx_int.ModelDefinition getObjectBoxModel() {
               obx_int.RelInfo<AttributeComponent>.toOneBacklink(5, object.id,
                   (AttributeComponent srcObject) => srcObject.baseNodeParent));
           return object;
+        }),
+    RPChat: obx_int.EntityDefinition<RPChat>(
+        model: _entities[2],
+        toOneRelations: (RPChat object) => [],
+        toManyRelations: (RPChat object) => {
+              obx_int.RelInfo<RPChatMessage>.toOneBacklink(2, object.id,
+                  (RPChatMessage srcObject) => srcObject.chat): object.messages
+            },
+        getId: (RPChat object) => object.id,
+        setId: (RPChat object, int id) {
+          object.id = id;
+        },
+        objectToFB: (RPChat object, fb.Builder fbb) {
+          fbb.startTable(3);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.created?.millisecondsSinceEpoch);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final createdValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 6);
+          final object = RPChat()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..created = createdValue == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(createdValue);
+          obx_int.InternalToManyAccess.setRelInfo<RPChat>(
+              object.messages,
+              store,
+              obx_int.RelInfo<RPChatMessage>.toOneBacklink(
+                  2, object.id, (RPChatMessage srcObject) => srcObject.chat));
+          return object;
+        }),
+    RPChatMessage: obx_int.EntityDefinition<RPChatMessage>(
+        model: _entities[3],
+        toOneRelations: (RPChatMessage object) => [object.chat],
+        toManyRelations: (RPChatMessage object) => {},
+        getId: (RPChatMessage object) => object.id,
+        setId: (RPChatMessage object, int id) {
+          object.id = id;
+        },
+        objectToFB: (RPChatMessage object, fb.Builder fbb) {
+          final textOffset = fbb.writeString(object.text);
+          final modelOffset =
+              object.model == null ? null : fbb.writeString(object.model!);
+          final imageFileOffset = object.imageFile == null
+              ? null
+              : fbb.writeString(object.imageFile!);
+          final imageBase64Offset = object.imageBase64 == null
+              ? null
+              : fbb.writeString(object.imageBase64!);
+          fbb.startTable(9);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.chat.targetId);
+          fbb.addInt64(2, object.type);
+          fbb.addOffset(3, textOffset);
+          fbb.addBool(4, object.complete);
+          fbb.addOffset(5, modelOffset);
+          fbb.addOffset(6, imageFileOffset);
+          fbb.addOffset(7, imageBase64Offset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = RPChatMessage()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..type = const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0)
+            ..text = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 10, '')
+            ..complete =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 12, false)
+            ..model = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 14)
+            ..imageFile = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 16)
+            ..imageBase64 = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 18);
+          object.chat.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          object.chat.attach(store);
+          return object;
+        }),
+    Scenario: obx_int.EntityDefinition<Scenario>(
+        model: _entities[4],
+        toOneRelations: (Scenario object) => [],
+        toManyRelations: (Scenario object) =>
+            {obx_int.RelInfo<Scenario>.toMany(1, object.id): object.nodes},
+        getId: (Scenario object) => object.id,
+        setId: (Scenario object, int id) {
+          object.id = id;
+        },
+        objectToFB: (Scenario object, fb.Builder fbb) {
+          final nameOffset =
+              object.name == null ? null : fbb.writeString(object.name!);
+          final descriptionOffset = object.description == null
+              ? null
+              : fbb.writeString(object.description!);
+          final imagePathOffset = object.imagePath == null
+              ? null
+              : fbb.writeString(object.imagePath!);
+          fbb.startTable(7);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.created?.millisecondsSinceEpoch);
+          fbb.addInt64(2, object.modified?.millisecondsSinceEpoch);
+          fbb.addOffset(3, nameOffset);
+          fbb.addOffset(4, descriptionOffset);
+          fbb.addOffset(5, imagePathOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final createdValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 6);
+          final modifiedValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8);
+          final object = Scenario()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..created = createdValue == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(createdValue)
+            ..modified = modifiedValue == null
+                ? null
+                : DateTime.fromMillisecondsSinceEpoch(modifiedValue)
+            ..name = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 10)
+            ..description = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 12)
+            ..imagePath = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 14);
+          obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.nodes, store,
+              obx_int.RelInfo<Scenario>.toMany(1, object.id));
+          return object;
         })
   };
 
@@ -367,4 +624,85 @@ class BaseNode_ {
   static final attributes =
       obx.QueryBacklinkToMany<AttributeComponent, BaseNode>(
           AttributeComponent_.baseNodeParent);
+}
+
+/// [RPChat] entity fields to define ObjectBox queries.
+class RPChat_ {
+  /// See [RPChat.id].
+  static final id =
+      obx.QueryIntegerProperty<RPChat>(_entities[2].properties[0]);
+
+  /// See [RPChat.created].
+  static final created =
+      obx.QueryDateProperty<RPChat>(_entities[2].properties[1]);
+
+  /// see [RPChat.messages]
+  static final messages =
+      obx.QueryBacklinkToMany<RPChatMessage, RPChat>(RPChatMessage_.chat);
+}
+
+/// [RPChatMessage] entity fields to define ObjectBox queries.
+class RPChatMessage_ {
+  /// See [RPChatMessage.id].
+  static final id =
+      obx.QueryIntegerProperty<RPChatMessage>(_entities[3].properties[0]);
+
+  /// See [RPChatMessage.chat].
+  static final chat =
+      obx.QueryRelationToOne<RPChatMessage, RPChat>(_entities[3].properties[1]);
+
+  /// See [RPChatMessage.type].
+  static final type =
+      obx.QueryIntegerProperty<RPChatMessage>(_entities[3].properties[2]);
+
+  /// See [RPChatMessage.text].
+  static final text =
+      obx.QueryStringProperty<RPChatMessage>(_entities[3].properties[3]);
+
+  /// See [RPChatMessage.complete].
+  static final complete =
+      obx.QueryBooleanProperty<RPChatMessage>(_entities[3].properties[4]);
+
+  /// See [RPChatMessage.model].
+  static final model =
+      obx.QueryStringProperty<RPChatMessage>(_entities[3].properties[5]);
+
+  /// See [RPChatMessage.imageFile].
+  static final imageFile =
+      obx.QueryStringProperty<RPChatMessage>(_entities[3].properties[6]);
+
+  /// See [RPChatMessage.imageBase64].
+  static final imageBase64 =
+      obx.QueryStringProperty<RPChatMessage>(_entities[3].properties[7]);
+}
+
+/// [Scenario] entity fields to define ObjectBox queries.
+class Scenario_ {
+  /// See [Scenario.id].
+  static final id =
+      obx.QueryIntegerProperty<Scenario>(_entities[4].properties[0]);
+
+  /// See [Scenario.created].
+  static final created =
+      obx.QueryDateProperty<Scenario>(_entities[4].properties[1]);
+
+  /// See [Scenario.modified].
+  static final modified =
+      obx.QueryDateProperty<Scenario>(_entities[4].properties[2]);
+
+  /// See [Scenario.name].
+  static final name =
+      obx.QueryStringProperty<Scenario>(_entities[4].properties[3]);
+
+  /// See [Scenario.description].
+  static final description =
+      obx.QueryStringProperty<Scenario>(_entities[4].properties[4]);
+
+  /// See [Scenario.imagePath].
+  static final imagePath =
+      obx.QueryStringProperty<Scenario>(_entities[4].properties[5]);
+
+  /// see [Scenario.nodes]
+  static final nodes =
+      obx.QueryRelationToMany<Scenario, BaseNode>(_entities[4].relations[0]);
 }

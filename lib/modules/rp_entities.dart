@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:moonie/modules/rp_context.dart';
-import 'package:moonie/modules/rp_context.dart';
-import 'package:moonie/modules/rp_entities.dart';
-import 'package:moonie/objectbox.g.dart';
+import 'package:objectbox/objectbox.dart';
+import 'package:moonie/utils.dart';
 
 /// A base node of the context graph. Typically a character or a world etc.
 @Entity()
@@ -145,6 +143,17 @@ class BaseNode extends ChangeNotifier {
     context!.notifyListeners();
     return newNode;
   }
+
+  String toXML() {
+    final xml = StringBuffer();
+    final tagName = sanitizeTagName(baseRoleNames[getRole()]!);
+    xml.writeln('<$tagName name="$name">');
+    for (final attr in getAttributes()) {
+      xml.writeln('\t${attr.toXML()}');
+    }
+    xml.writeln('</$tagName>');
+    return xml.toString();
+  }
 }
 
 /// An attribute, typically of a base node.
@@ -245,5 +254,17 @@ class AttributeComponent extends ChangeNotifier {
     newAttribute.context = context!;
     context!.notifyListeners();
     return newAttribute;
+  }
+
+  String toXML() {
+    final xml = StringBuffer();
+    final tagName = sanitizeTagName(name);
+    xml.writeln('<$tagName>');
+    xml.writeln('\t$content');
+    for (final child in getChildren()) {
+      xml.writeln('\t${child.toXML()}');
+    }
+    xml.writeln('</$tagName>');
+    return xml.toString();
   }
 }

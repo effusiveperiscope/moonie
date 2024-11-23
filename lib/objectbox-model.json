@@ -96,11 +96,127 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "4:3282090211557049256",
+      "lastPropertyId": "2:8091468834881721331",
+      "name": "RPChat",
+      "properties": [
+        {
+          "id": "1:7152136574589467017",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8091468834881721331",
+          "name": "created",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:511921411842288960",
+      "lastPropertyId": "8:8056134531063793538",
+      "name": "RPChatMessage",
+      "properties": [
+        {
+          "id": "1:78964320017614895",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:625961826070715997",
+          "name": "chatId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:5906729401673455253",
+          "relationTarget": "RPChat"
+        },
+        {
+          "id": "3:3396515535393987406",
+          "name": "type",
+          "type": 6
+        },
+        {
+          "id": "4:5401280511708130726",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "5:8244150442921025964",
+          "name": "complete",
+          "type": 1
+        },
+        {
+          "id": "6:5398496801857295952",
+          "name": "model",
+          "type": 9
+        },
+        {
+          "id": "7:1773150720023693248",
+          "name": "imageFile",
+          "type": 9
+        },
+        {
+          "id": "8:8056134531063793538",
+          "name": "imageBase64",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:3437152827243650063",
+      "lastPropertyId": "6:6322375816734078315",
+      "name": "Scenario",
+      "properties": [
+        {
+          "id": "1:867616263981151958",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:840811417770736007",
+          "name": "created",
+          "type": 10
+        },
+        {
+          "id": "3:6790151879368114499",
+          "name": "modified",
+          "type": 10
+        },
+        {
+          "id": "4:4129207706312321032",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "5:6971865851957906699",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:6322375816734078315",
+          "name": "imagePath",
+          "type": 9
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:7681578514651760447",
+          "name": "nodes",
+          "targetId": "3:7450678709023556741"
+        }
+      ]
     }
   ],
-  "lastEntityId": "3:7450678709023556741",
-  "lastIndexId": "2:1641280788405409404",
-  "lastRelationId": "0:0",
+  "lastEntityId": "6:3437152827243650063",
+  "lastIndexId": "3:5906729401673455253",
+  "lastRelationId": "1:7681578514651760447",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

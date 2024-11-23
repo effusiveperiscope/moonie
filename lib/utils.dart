@@ -196,3 +196,33 @@ class TavernCard {
     return ret;
   }
 }
+
+String sanitizeTagName(String input) {
+  String ret = input.replaceAll(' ', '_');
+  ret = ret.replaceAll('/', '_');
+  ret = ret.replaceAll('\\', '_');
+  ret = ret.replaceAll('.', '_');
+  ret = ret.replaceAll(',', '_');
+  ret = ret.replaceAll('?', '_');
+  ret = ret.replaceAll('!', '_');
+  ret = ret.replaceAll('*', '_');
+  ret = ret.replaceAll('\\(', '_');
+  ret = ret.replaceAll('\\)', '_');
+  ret = ret.replaceAll('[', '_');
+  ret = ret.replaceAll(']', '_');
+  ret = ret.replaceAll('{', '_');
+  ret = ret.replaceAll('}', '_');
+  ret = ret.replaceAll('\\|', '_');
+  ret = ret.replaceAll('\\<', '_');
+  ret = ret.replaceAll('\\>', '_');
+
+  if (ret.startsWith('_')) {
+    ret = ret.substring(1);
+  }
+
+  if (ret.startsWith('0-9')) {
+    ret = 'x$ret';
+  }
+
+  return ret;
+}
