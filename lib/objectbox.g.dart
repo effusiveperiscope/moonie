@@ -125,7 +125,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(4, 3282090211557049256),
       name: 'RPChat',
-      lastPropertyId: const obx_int.IdUid(2, 8091468834881721331),
+      lastPropertyId: const obx_int.IdUid(3, 1669855966729632464),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -137,9 +137,21 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(2, 8091468834881721331),
             name: 'created',
             type: 10,
-            flags: 0)
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 1669855966729632464),
+            name: 'scenarioId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(5, 9144486380016293467),
+            relationTarget: 'Scenario')
       ],
-      relations: <obx_int.ModelRelation>[],
+      relations: <obx_int.ModelRelation>[
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(3, 8351717491709240776),
+            name: 'fills',
+            targetId: const obx_int.IdUid(8, 2211366243110903590))
+      ],
       backlinks: <obx_int.ModelBacklink>[
         obx_int.ModelBacklink(
             name: 'messages', srcEntity: 'RPChatMessage', srcField: 'chat')
@@ -234,13 +246,90 @@ final _entities = <obx_int.ModelEntity>[
       ],
       relations: <obx_int.ModelRelation>[
         obx_int.ModelRelation(
-            id: const obx_int.IdUid(1, 7681578514651760447),
-            name: 'nodes',
-            targetId: const obx_int.IdUid(3, 7450678709023556741)),
-        obx_int.ModelRelation(
             id: const obx_int.IdUid(2, 2908409073072139381),
             name: 'chats',
-            targetId: const obx_int.IdUid(4, 3282090211557049256))
+            targetId: const obx_int.IdUid(4, 3282090211557049256)),
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(4, 8341153981932459170),
+            name: 'slots',
+            targetId: const obx_int.IdUid(7, 3798956690027680554))
+      ],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(7, 3798956690027680554),
+      name: 'NodeSlot',
+      lastPropertyId: const obx_int.IdUid(7, 1994096065274067563),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 6968857406583217591),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 2064520848058214732),
+            name: 'defaultFillId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(4, 5729036034711493949),
+            relationTarget: 'SlotFill'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 6530597446765479775),
+            name: 'defaultStringFill',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 5172191515377516785),
+            name: 'isStringSlot',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 8164644701498533613),
+            name: 'tag',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 2519945762232208513),
+            name: 'allowsMultiple',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 1994096065274067563),
+            name: 'role',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(8, 2211366243110903590),
+      name: 'SlotFill',
+      lastPropertyId: const obx_int.IdUid(3, 1813809698706916541),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 4009389784590241433),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 1585388554469843925),
+            name: 'slotId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(6, 4945596999143365656),
+            relationTarget: 'NodeSlot'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 1813809698706916541),
+            name: 'content',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(5, 5792161197792742413),
+            name: 'nodes',
+            targetId: const obx_int.IdUid(3, 7450678709023556741))
       ],
       backlinks: <obx_int.ModelBacklink>[])
 ];
@@ -279,9 +368,9 @@ obx.Store openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(6, 3437152827243650063),
-      lastIndexId: const obx_int.IdUid(3, 5906729401673455253),
-      lastRelationId: const obx_int.IdUid(2, 2908409073072139381),
+      lastEntityId: const obx_int.IdUid(8, 2211366243110903590),
+      lastIndexId: const obx_int.IdUid(6, 4945596999143365656),
+      lastRelationId: const obx_int.IdUid(5, 5792161197792742413),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [100189409228318002],
       retiredIndexUids: const [],
@@ -292,7 +381,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         7399582237831664813,
         920284700552311724
       ],
-      retiredRelationUids: const [],
+      retiredRelationUids: const [7681578514651760447],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
@@ -413,8 +502,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         }),
     RPChat: obx_int.EntityDefinition<RPChat>(
         model: _entities[2],
-        toOneRelations: (RPChat object) => [],
+        toOneRelations: (RPChat object) => [object.scenario],
         toManyRelations: (RPChat object) => {
+              obx_int.RelInfo<RPChat>.toMany(3, object.id): object.fills,
               obx_int.RelInfo<RPChatMessage>.toOneBacklink(2, object.id,
                   (RPChatMessage srcObject) => srcObject.chat): object.messages
             },
@@ -423,9 +513,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (RPChat object, fb.Builder fbb) {
-          fbb.startTable(3);
+          fbb.startTable(4);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.created?.millisecondsSinceEpoch);
+          fbb.addInt64(2, object.scenario.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -439,6 +530,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ..created = createdValue == null
                 ? null
                 : DateTime.fromMillisecondsSinceEpoch(createdValue);
+          object.scenario.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+          object.scenario.attach(store);
+          obx_int.InternalToManyAccess.setRelInfo<RPChat>(object.fills, store,
+              obx_int.RelInfo<RPChat>.toMany(3, object.id));
           obx_int.InternalToManyAccess.setRelInfo<RPChat>(
               object.messages,
               store,
@@ -502,8 +598,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         model: _entities[4],
         toOneRelations: (Scenario object) => [],
         toManyRelations: (Scenario object) => {
-              obx_int.RelInfo<Scenario>.toMany(1, object.id): object.nodes,
-              obx_int.RelInfo<Scenario>.toMany(2, object.id): object.chats
+              obx_int.RelInfo<Scenario>.toMany(2, object.id): object.chats,
+              obx_int.RelInfo<Scenario>.toMany(4, object.id): object.slots
             },
         getId: (Scenario object) => object.id,
         setId: (Scenario object, int id) {
@@ -549,10 +645,90 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGetNullable(buffer, rootOffset, 12)
             ..imagePath = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 14);
-          obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.nodes, store,
-              obx_int.RelInfo<Scenario>.toMany(1, object.id));
           obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.chats, store,
               obx_int.RelInfo<Scenario>.toMany(2, object.id));
+          obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.slots, store,
+              obx_int.RelInfo<Scenario>.toMany(4, object.id));
+          return object;
+        }),
+    NodeSlot: obx_int.EntityDefinition<NodeSlot>(
+        model: _entities[5],
+        toOneRelations: (NodeSlot object) => [object.defaultFill],
+        toManyRelations: (NodeSlot object) => {},
+        getId: (NodeSlot object) => object.id,
+        setId: (NodeSlot object, int id) {
+          object.id = id;
+        },
+        objectToFB: (NodeSlot object, fb.Builder fbb) {
+          final defaultStringFillOffset = object.defaultStringFill == null
+              ? null
+              : fbb.writeString(object.defaultStringFill!);
+          final tagOffset =
+              object.tag == null ? null : fbb.writeString(object.tag!);
+          fbb.startTable(8);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.defaultFill.targetId);
+          fbb.addOffset(2, defaultStringFillOffset);
+          fbb.addBool(3, object.isStringSlot);
+          fbb.addOffset(4, tagOffset);
+          fbb.addBool(5, object.allowsMultiple);
+          fbb.addInt64(6, object.role);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = NodeSlot()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..defaultStringFill = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 8)
+            ..isStringSlot =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false)
+            ..tag = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 12)
+            ..allowsMultiple =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false)
+            ..role =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          object.defaultFill.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          object.defaultFill.attach(store);
+          return object;
+        }),
+    SlotFill: obx_int.EntityDefinition<SlotFill>(
+        model: _entities[6],
+        toOneRelations: (SlotFill object) => [object.slot],
+        toManyRelations: (SlotFill object) =>
+            {obx_int.RelInfo<SlotFill>.toMany(5, object.id): object.nodes},
+        getId: (SlotFill object) => object.id,
+        setId: (SlotFill object, int id) {
+          object.id = id;
+        },
+        objectToFB: (SlotFill object, fb.Builder fbb) {
+          final contentOffset =
+              object.content == null ? null : fbb.writeString(object.content!);
+          fbb.startTable(4);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.slot.targetId);
+          fbb.addOffset(2, contentOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = SlotFill()
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..content = const fb.StringReader(asciiOptimization: true)
+                .vTableGetNullable(buffer, rootOffset, 8);
+          object.slot.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          object.slot.attach(store);
+          obx_int.InternalToManyAccess.setRelInfo<SlotFill>(object.nodes, store,
+              obx_int.RelInfo<SlotFill>.toMany(5, object.id));
           return object;
         })
   };
@@ -644,6 +820,14 @@ class RPChat_ {
   static final created =
       obx.QueryDateProperty<RPChat>(_entities[2].properties[1]);
 
+  /// See [RPChat.scenario].
+  static final scenario =
+      obx.QueryRelationToOne<RPChat, Scenario>(_entities[2].properties[2]);
+
+  /// see [RPChat.fills]
+  static final fills =
+      obx.QueryRelationToMany<RPChat, SlotFill>(_entities[2].relations[0]);
+
   /// see [RPChat.messages]
   static final messages =
       obx.QueryBacklinkToMany<RPChatMessage, RPChat>(RPChatMessage_.chat);
@@ -710,11 +894,61 @@ class Scenario_ {
   static final imagePath =
       obx.QueryStringProperty<Scenario>(_entities[4].properties[5]);
 
-  /// see [Scenario.nodes]
-  static final nodes =
-      obx.QueryRelationToMany<Scenario, BaseNode>(_entities[4].relations[0]);
-
   /// see [Scenario.chats]
   static final chats =
-      obx.QueryRelationToMany<Scenario, RPChat>(_entities[4].relations[1]);
+      obx.QueryRelationToMany<Scenario, RPChat>(_entities[4].relations[0]);
+
+  /// see [Scenario.slots]
+  static final slots =
+      obx.QueryRelationToMany<Scenario, NodeSlot>(_entities[4].relations[1]);
+}
+
+/// [NodeSlot] entity fields to define ObjectBox queries.
+class NodeSlot_ {
+  /// See [NodeSlot.id].
+  static final id =
+      obx.QueryIntegerProperty<NodeSlot>(_entities[5].properties[0]);
+
+  /// See [NodeSlot.defaultFill].
+  static final defaultFill =
+      obx.QueryRelationToOne<NodeSlot, SlotFill>(_entities[5].properties[1]);
+
+  /// See [NodeSlot.defaultStringFill].
+  static final defaultStringFill =
+      obx.QueryStringProperty<NodeSlot>(_entities[5].properties[2]);
+
+  /// See [NodeSlot.isStringSlot].
+  static final isStringSlot =
+      obx.QueryBooleanProperty<NodeSlot>(_entities[5].properties[3]);
+
+  /// See [NodeSlot.tag].
+  static final tag =
+      obx.QueryStringProperty<NodeSlot>(_entities[5].properties[4]);
+
+  /// See [NodeSlot.allowsMultiple].
+  static final allowsMultiple =
+      obx.QueryBooleanProperty<NodeSlot>(_entities[5].properties[5]);
+
+  /// See [NodeSlot.role].
+  static final role =
+      obx.QueryIntegerProperty<NodeSlot>(_entities[5].properties[6]);
+}
+
+/// [SlotFill] entity fields to define ObjectBox queries.
+class SlotFill_ {
+  /// See [SlotFill.id].
+  static final id =
+      obx.QueryIntegerProperty<SlotFill>(_entities[6].properties[0]);
+
+  /// See [SlotFill.slot].
+  static final slot =
+      obx.QueryRelationToOne<SlotFill, NodeSlot>(_entities[6].properties[1]);
+
+  /// See [SlotFill.content].
+  static final content =
+      obx.QueryStringProperty<SlotFill>(_entities[6].properties[2]);
+
+  /// see [SlotFill.nodes]
+  static final nodes =
+      obx.QueryRelationToMany<SlotFill, BaseNode>(_entities[6].relations[0]);
 }

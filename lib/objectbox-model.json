@@ -99,7 +99,7 @@
     },
     {
       "id": "4:3282090211557049256",
-      "lastPropertyId": "2:8091468834881721331",
+      "lastPropertyId": "3:1669855966729632464",
       "name": "RPChat",
       "properties": [
         {
@@ -112,9 +112,23 @@
           "id": "2:8091468834881721331",
           "name": "created",
           "type": 10
+        },
+        {
+          "id": "3:1669855966729632464",
+          "name": "scenarioId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "5:9144486380016293467",
+          "relationTarget": "Scenario"
         }
       ],
-      "relations": []
+      "relations": [
+        {
+          "id": "3:8351717491709240776",
+          "name": "fills",
+          "targetId": "8:2211366243110903590"
+        }
+      ]
     },
     {
       "id": "5:511921411842288960",
@@ -207,21 +221,101 @@
       ],
       "relations": [
         {
-          "id": "1:7681578514651760447",
-          "name": "nodes",
-          "targetId": "3:7450678709023556741"
-        },
-        {
           "id": "2:2908409073072139381",
           "name": "chats",
           "targetId": "4:3282090211557049256"
+        },
+        {
+          "id": "4:8341153981932459170",
+          "name": "slots",
+          "targetId": "7:3798956690027680554"
+        }
+      ]
+    },
+    {
+      "id": "7:3798956690027680554",
+      "lastPropertyId": "7:1994096065274067563",
+      "name": "NodeSlot",
+      "properties": [
+        {
+          "id": "1:6968857406583217591",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2064520848058214732",
+          "name": "defaultFillId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "4:5729036034711493949",
+          "relationTarget": "SlotFill"
+        },
+        {
+          "id": "3:6530597446765479775",
+          "name": "defaultStringFill",
+          "type": 9
+        },
+        {
+          "id": "4:5172191515377516785",
+          "name": "isStringSlot",
+          "type": 1
+        },
+        {
+          "id": "5:8164644701498533613",
+          "name": "tag",
+          "type": 9
+        },
+        {
+          "id": "6:2519945762232208513",
+          "name": "allowsMultiple",
+          "type": 1
+        },
+        {
+          "id": "7:1994096065274067563",
+          "name": "role",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:2211366243110903590",
+      "lastPropertyId": "3:1813809698706916541",
+      "name": "SlotFill",
+      "properties": [
+        {
+          "id": "1:4009389784590241433",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1585388554469843925",
+          "name": "slotId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "6:4945596999143365656",
+          "relationTarget": "NodeSlot"
+        },
+        {
+          "id": "3:1813809698706916541",
+          "name": "content",
+          "type": 9
+        }
+      ],
+      "relations": [
+        {
+          "id": "5:5792161197792742413",
+          "name": "nodes",
+          "targetId": "3:7450678709023556741"
         }
       ]
     }
   ],
-  "lastEntityId": "6:3437152827243650063",
-  "lastIndexId": "3:5906729401673455253",
-  "lastRelationId": "2:2908409073072139381",
+  "lastEntityId": "8:2211366243110903590",
+  "lastIndexId": "6:4945596999143365656",
+  "lastRelationId": "5:5792161197792742413",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
@@ -236,6 +330,8 @@
     7399582237831664813,
     920284700552311724
   ],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    7681578514651760447
+  ],
   "version": 1
 }
