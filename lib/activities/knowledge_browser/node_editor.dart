@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
-import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
 import 'package:moonie/widgets/croppable_image.dart';
 import 'package:provider/provider.dart';
@@ -192,7 +191,6 @@ class _NodeEditorState extends State<NodeEditor> {
 
   Future<void> showAddAttributeDialog({String? prefillName}) async {
     final node = widget.node;
-    final ctx = node.context!;
 
     String name =
         (prefillName != null) ? prefillName : ''; // Set initial text if needed

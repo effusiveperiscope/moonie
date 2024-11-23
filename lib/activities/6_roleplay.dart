@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activities/activity.dart';

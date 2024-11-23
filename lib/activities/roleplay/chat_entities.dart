@@ -7,7 +7,6 @@ import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
 import 'package:objectbox/objectbox.dart';
-import 'package:collection/collection.dart';
 
 @Entity()
 class RPChat extends ChangeNotifier {
