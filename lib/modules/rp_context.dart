@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_entities.dart';
-import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/activities/roleplay/scenario.dart';
 import 'package:moonie/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';

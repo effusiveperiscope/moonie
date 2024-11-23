@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_getters_setters
+
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/modules/rp_context.dart';
@@ -158,25 +160,39 @@ class Scenario extends ChangeNotifier {
   @override
   void notifyListeners() {
     super.notifyListeners();
-    modified = DateTime.now();
     context?.scenarios.put(this);
   }
 
   String get name => _name;
   set name(String value) {
     _name = value;
+  }
+
+  void setName(String value) {
+    _name = value;
+    modified = DateTime.now();
     notifyListeners();
   }
 
   String? get description => _description;
   set description(String? value) {
     _description = value;
+  }
+
+  void setDescription(String? value) {
+    _description = value;
+    modified = DateTime.now();
     notifyListeners();
   }
 
   String? get imagePath => _imagePath;
   set imagePath(String? value) {
     _imagePath = value;
+  }
+
+  void setImagePath(String? value) {
+    _imagePath = value;
+    modified = DateTime.now();
     notifyListeners();
   }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_getters_setters
+
 import 'package:flutter/material.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:objectbox/objectbox.dart';
@@ -23,6 +25,10 @@ class BaseNode extends ChangeNotifier {
   String get imagePath => _imagePath;
   set imagePath(String value) {
     _imagePath = value;
+  }
+
+  void setImagePath(String value) {
+    _imagePath = value;
     modified = DateTime.now();
     notifyListeners();
   }
@@ -30,6 +36,9 @@ class BaseNode extends ChangeNotifier {
   String get name => _name;
   set name(String value) {
     _name = value;
+  }
+
+  void setName(String value) {
     modified = DateTime.now();
     notifyListeners();
   }
@@ -37,6 +46,9 @@ class BaseNode extends ChangeNotifier {
   String get description => _description;
   set description(String value) {
     _description = value;
+  }
+
+  void setDescription(String value) {
     modified = DateTime.now();
     notifyListeners();
   }
@@ -173,6 +185,8 @@ class AttributeComponent extends ChangeNotifier {
   int? _attributePosition;
 
   String _name = '';
+
+  // Doesn't track creation or modification date so no special setters needed
 
   /// Unused - may decide to get rid of it later as it's not very useful
   String _description = '';

@@ -39,7 +39,7 @@ class _NodeEditorState extends State<NodeEditor> {
     controller = CroppableImageController(
         initialImage: widget.node.imagePath,
         onImagePicked: (imagePath) {
-          widget.node.imagePath = imagePath;
+          widget.node.setImagePath(imagePath);
         });
   }
 
@@ -79,7 +79,7 @@ class _NodeEditorState extends State<NodeEditor> {
           controller: nameController,
           onChanged: (value) => setState(
             () {
-              widget.node.name = value;
+              widget.node.setName(value);
             },
           ),
           decoration: const InputDecoration(
@@ -120,7 +120,7 @@ class _NodeEditorState extends State<NodeEditor> {
                                   style: const TextStyle(fontSize: 12),
                                   maxLines: 3,
                                   onChanged: (value) => setState(() {
-                                    node.description = value;
+                                    node.setDescription(value);
                                   }),
                                   decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
