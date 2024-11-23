@@ -146,15 +146,18 @@ class _NodeEditorState extends State<NodeEditor> {
                         const SizedBox(width: 8),
                         Expanded(
                           flex: 2,
-                          child: CroppableImage(
-                            height: 200,
-                            controller: controller,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 14.0),
+                            child: CroppableImage(
+                              height: 200,
+                              controller: controller,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const Divider(),
-                    const Text('Attributes:',
+                    const Text('Attributes',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(
                       height: 8,

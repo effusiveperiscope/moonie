@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fw;
 import 'package:moonie/activities/commons.dart';
+import 'package:moonie/activities/roleplay/scenario_editor.dart';
 import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
@@ -254,7 +255,9 @@ class ScenarioDisplayWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton.outlined(
                   onPressed: () {
-                    throw UnimplementedError();
+                    Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => ChangeNotifierProvider.value(
+                            value: scenario, child: ScenarioEditor(scenario))));
                   },
                   icon: const Icon(Icons.edit),
                   visualDensity: VisualDensity.compact,
@@ -272,7 +275,7 @@ class ScenarioDisplayWidget extends StatelessWidget {
                 const SizedBox(width: 16),
                 SizedBox(
                     width: 48,
-                    height: 64,
+                    height: 72,
                     child: ((scenario.imagePath != null)
                         ? Image(image: FileImage(File(scenario.imagePath!)))
                         : Container(color: colorScheme.onSecondary))),
