@@ -244,8 +244,7 @@ class _NodeEditorState extends State<NodeEditor> {
               child: const Text('Add'),
               onPressed: () {
                 if (name.isNotEmpty && content.isNotEmpty) {
-                  final attr = ctx.createAttribute(name, content);
-                  node.addAttribute(attr);
+                  node.createAttribute(name, content);
                 }
                 Navigator.of(context).pop();
               },

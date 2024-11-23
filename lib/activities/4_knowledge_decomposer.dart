@@ -289,14 +289,11 @@ class KnowledgeDecomposer extends ChangeNotifier {
             decomposeCharacterPrompt, {'input': input, 'character': char});
         status('Decomposed character: $char..., res: $charRes');
         BaseNode characterNode = context.createNode(BaseRole.character, char);
-        characterNode.addAttribute(
-            context.createAttribute('appearance', charRes['appearance']));
-        characterNode.addAttribute(
-            context.createAttribute('personality', charRes['personality']));
-        characterNode.addAttribute(context.createAttribute(
-            'relations_and_backstory', charRes['relations_and_backstory']));
-        characterNode.addAttribute(
-            context.createAttribute('abilities', charRes['abilities']));
+        characterNode.createAttribute('appearance', charRes['appearance']);
+        characterNode.createAttribute('personality', charRes['personality']);
+        characterNode.createAttribute(
+            'relations_and_backstory', charRes['relations_and_backstory']);
+        characterNode.createAttribute('abilities', charRes['abilities']);
       }
       error('');
     } catch (e) {

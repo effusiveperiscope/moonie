@@ -3,7 +3,7 @@ import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/modules/rp_entities.dart';
-import 'package:moonie/modules/scenario.dart';
+import 'package:moonie/activities/roleplay/scenario.dart';
 import 'package:moonie/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -29,15 +29,6 @@ class RPContext extends ChangeNotifier {
   }
 
   RPContext(this.core) : store = core.store;
-
-  RPChat createChat() {
-    final chat = RPChat();
-    chat.created = DateTime.now();
-    chat.context = this;
-    chat.id = chats.put(chat);
-    notifyListeners();
-    return chat;
-  }
 
   void deleteChat(RPChat chat) {
     chats.remove(chat.id);
@@ -94,16 +85,7 @@ class RPContext extends ChangeNotifier {
   }
 
   /// Not to be called directly exccept by BaseNode
-  AttributeComponent createAttribute(String name, String content,
-      {String description = ''}) {
-    final attr = AttributeComponent();
-    attr.name = name;
-    attr.description = description;
-    attr.content = content;
-    attr.context = this;
-    attr.id = attributes.put(attr);
-    return attr;
-  }
+  /// (If not, then why not just put it inside BaseNode???)
 
   // Right now the plan is just to spit the entire graph out into context
   // If we want to look into more sophisticated solutions later,

@@ -14,8 +14,8 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 
 import 'activities/roleplay/chat_entities.dart';
+import 'activities/roleplay/scenario.dart';
 import 'modules/rp_entities.dart';
-import 'modules/scenario.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -236,7 +236,11 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelRelation(
             id: const obx_int.IdUid(1, 7681578514651760447),
             name: 'nodes',
-            targetId: const obx_int.IdUid(3, 7450678709023556741))
+            targetId: const obx_int.IdUid(3, 7450678709023556741)),
+        obx_int.ModelRelation(
+            id: const obx_int.IdUid(2, 2908409073072139381),
+            name: 'chats',
+            targetId: const obx_int.IdUid(4, 3282090211557049256))
       ],
       backlinks: <obx_int.ModelBacklink>[])
 ];
@@ -277,7 +281,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       entities: _entities,
       lastEntityId: const obx_int.IdUid(6, 3437152827243650063),
       lastIndexId: const obx_int.IdUid(3, 5906729401673455253),
-      lastRelationId: const obx_int.IdUid(1, 7681578514651760447),
+      lastRelationId: const obx_int.IdUid(2, 2908409073072139381),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [100189409228318002],
       retiredIndexUids: const [],
@@ -497,8 +501,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
     Scenario: obx_int.EntityDefinition<Scenario>(
         model: _entities[4],
         toOneRelations: (Scenario object) => [],
-        toManyRelations: (Scenario object) =>
-            {obx_int.RelInfo<Scenario>.toMany(1, object.id): object.nodes},
+        toManyRelations: (Scenario object) => {
+              obx_int.RelInfo<Scenario>.toMany(1, object.id): object.nodes,
+              obx_int.RelInfo<Scenario>.toMany(2, object.id): object.chats
+            },
         getId: (Scenario object) => object.id,
         setId: (Scenario object, int id) {
           object.id = id;
@@ -545,6 +551,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGetNullable(buffer, rootOffset, 14);
           obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.nodes, store,
               obx_int.RelInfo<Scenario>.toMany(1, object.id));
+          obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.chats, store,
+              obx_int.RelInfo<Scenario>.toMany(2, object.id));
           return object;
         })
   };
@@ -705,4 +713,8 @@ class Scenario_ {
   /// see [Scenario.nodes]
   static final nodes =
       obx.QueryRelationToMany<Scenario, BaseNode>(_entities[4].relations[0]);
+
+  /// see [Scenario.chats]
+  static final chats =
+      obx.QueryRelationToMany<Scenario, RPChat>(_entities[4].relations[1]);
 }

@@ -43,10 +43,22 @@ class Scenario extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Danger: This is a non-owning (shared) reference
   final nodes = ToMany<BaseNode>();
+  final chats = ToMany<RPChat>();
 
   @Transient()
   RPContext? context;
+
+  RPChat createChat() {
+    final chat = RPChat();
+    chat.created = DateTime.now();
+    chat.context = context!;
+    chat.id = context!.chats.put(chat);
+    chats.add(chat);
+    notifyListeners();
+    return chat;
+  }
 
   List<BaseNode> get nodesList =>
       nodes.map((e) => e..context = context).toList();

@@ -53,6 +53,22 @@ class BaseNode extends ChangeNotifier {
   @Transient()
   RPContext? context;
 
+  AttributeComponent createAttribute(String name, String content,
+      {String description = ''}) {
+    final attr = AttributeComponent();
+    attr.name = name;
+    attr.description = description;
+    attr.content = content;
+    attr.baseNodeParent.target = this;
+    attr.context = context!;
+    attr.id = context!.attributes.put(attr);
+    attributes.add(attr);
+    attr.attributePosition = attributes.length - 1;
+    refreshAttributePositions();
+    notifyListeners();
+    return attr;
+  }
+
   List<AttributeComponent> getAttributes() {
     return attributes.map((e) {
       e.context = context!;
@@ -97,15 +113,6 @@ class BaseNode extends ChangeNotifier {
 
   void setRole(BaseRole r) {
     role = r.index;
-  }
-
-  void addAttribute(AttributeComponent attr) {
-    attr.context = context!;
-    attr.setParent(this);
-    attributes.add(attr);
-    attr.attributePosition = attributes.length - 1;
-    refreshAttributePositions();
-    notifyListeners();
   }
 
   void removeAttribute(AttributeComponent attr) {

@@ -210,13 +210,18 @@
           "id": "1:7681578514651760447",
           "name": "nodes",
           "targetId": "3:7450678709023556741"
+        },
+        {
+          "id": "2:2908409073072139381",
+          "name": "chats",
+          "targetId": "4:3282090211557049256"
         }
       ]
     }
   ],
   "lastEntityId": "6:3437152827243650063",
   "lastIndexId": "3:5906729401673455253",
-  "lastRelationId": "1:7681578514651760447",
+  "lastRelationId": "2:2908409073072139381",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
