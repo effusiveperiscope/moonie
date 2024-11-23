@@ -36,9 +36,13 @@ class CroppableImageController extends ChangeNotifier {
 // Allows uploading and cropping images to app
 class CroppableImage extends StatefulWidget {
   final double height;
+  final double aspectRatio;
   final CroppableImageController controller;
   const CroppableImage(
-      {super.key, required this.height, required this.controller});
+      {super.key,
+      required this.height,
+      this.aspectRatio = 1.0,
+      required this.controller});
 
   @override
   State<CroppableImage> createState() => _CroppableImageState();
@@ -83,6 +87,7 @@ class _CroppableImageState extends State<CroppableImage> {
                   return (imageProvider != null)
                       ? Crop(
                           image: imageBytes!,
+                          aspectRatio: widget.aspectRatio,
                           controller: cropController,
                           onCropped: (result) async {
                             final res = await writeImageToImagesDir(
