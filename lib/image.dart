@@ -23,7 +23,7 @@ Future<File> copyImageToImagesDir(String path) async {
 }
 
 Future<File> writeImageToImagesDir(
-    String originalFilePath, Uint8List bytes) async {
+    String originalFilePath, Uint8List bytes, String? overrideExtension) async {
   final directory = await getApplicationDocumentsDirectory();
   final imagesDir = Directory(p.join(directory.path, imagesDirName));
 
@@ -33,6 +33,10 @@ Future<File> writeImageToImagesDir(
 
   final fileName = p.basename(originalFilePath);
   var newFileName = getUniqueSuffix(imagesDir, fileName);
+  if (overrideExtension != null) {
+    newFileName =
+        '${p.basenameWithoutExtension(newFileName)}.$overrideExtension';
+  }
   final newFilePath = p.join(imagesDir.path, newFileName);
 
   await File(newFilePath).writeAsBytes(bytes);

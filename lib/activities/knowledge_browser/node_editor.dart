@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
-import 'package:moonie/widgets/croppable_image.dart';
+import 'package:moonie/widgets/croppable_image2.dart';
 import 'package:provider/provider.dart';
 
 Map<BaseRole, List<String>> suggestedSchema = {
@@ -148,7 +148,7 @@ class _NodeEditorState extends State<NodeEditor> {
                           flex: 2,
                           child: Padding(
                             padding: const EdgeInsets.only(top: 14.0),
-                            child: CroppableImage(
+                            child: CroppableImage2(
                               height: 200,
                               controller: controller,
                             ),

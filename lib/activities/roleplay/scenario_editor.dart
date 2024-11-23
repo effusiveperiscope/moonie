@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/utils.dart';
-import 'package:moonie/widgets/croppable_image.dart';
+import 'package:moonie/widgets/croppable_image2.dart';
 
 class ScenarioEditor extends StatefulWidget {
   final Scenario scenario;
@@ -78,14 +78,19 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                         },
                       ),
                       const SizedBox(height: 8),
-                      const Row(
-                        children: [
-                          ActionChip(
-                            label: Text('Add slot'),
-                            avatar: Icon(Icons.add),
-                          ),
-                        ],
-                      )
+                      // SegmentedButton(segments: [
+                      // ButtonSegment(
+                      // label: const Text('Slots'),
+                      // )
+                      // ], selected: {})
+                      // const Row(
+                      // children: [
+                      // ActionChip(
+                      // label: Text('Add slot'),
+                      // avatar: Icon(Icons.add),
+                      // ),
+                      // ],
+                      // )
                     ],
                   ),
                 ),
@@ -95,10 +100,11 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 14.0),
                     // very important to get the pixel alignment ;)
-                    child: CroppableImage(
+                    child: CroppableImage2(
                       controller: croppableImageController,
+                      aspectWidth: 2,
+                      aspectHeight: 3,
                       height: 200,
-                      aspectRatio: 2 / 3,
                     ),
                   ),
                 ),
