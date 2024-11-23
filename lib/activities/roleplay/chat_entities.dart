@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
+import 'package:moonie/activities/roleplay/scenario.dart';
 import 'package:moonie/modules/rp_context.dart';
+import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:collection/collection.dart';
 
 @Entity()
 class RPChat extends ChangeNotifier {
@@ -23,6 +26,17 @@ class RPChat extends ChangeNotifier {
 
   @Backlink('chat')
   final messages = ToMany<RPChatMessage>();
+  final scenario = ToOne<Scenario>();
+  final fills = ToMany<SlotFill>();
+
+  SlotFill createFill(NodeSlot slot, {List<BaseNode>? nodes, String? content}) {
+    final fill = SlotFill()..slot.target = slot;
+    fill.nodes.addAll(nodes ?? []);
+    fill.content = content;
+    fill.context = context!;
+    context!.slotFills.put(fill);
+    return fill;
+  }
 
   RPChatMessage createMessage(
     ChatMessageType type,

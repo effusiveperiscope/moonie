@@ -7,8 +7,8 @@ import 'package:moonie/activities/roleplay/scenario.dart';
 import 'package:moonie/objectbox.g.dart';
 import 'package:objectbox/objectbox.dart';
 
-/// Maintains the nodes, chat messages, chats in disk storage and scenarios
-/// Also the factory for nodes and attributes.
+/// Maintains the RP/scenario entities in disk storage and scenarios
+/// Also the factory for nodes and scenarios.
 class RPContext extends ChangeNotifier {
   final MoonieCore core;
   final Store store;
@@ -17,6 +17,8 @@ class RPContext extends ChangeNotifier {
   late final Box<Scenario> scenarios;
   late final Box<RPChatMessage> chatMessages;
   late final Box<RPChat> chats;
+  late final Box<NodeSlot> slots;
+  late final Box<SlotFill> slotFills;
 
   static Future<RPContext> create(MoonieCore core) async {
     final ctx = RPContext(core);
@@ -25,6 +27,8 @@ class RPContext extends ChangeNotifier {
     ctx.scenarios = ctx.store.box<Scenario>();
     ctx.chatMessages = ctx.store.box<RPChatMessage>();
     ctx.chats = ctx.store.box<RPChat>();
+    ctx.slots = ctx.store.box<NodeSlot>();
+    ctx.slotFills = ctx.store.box<SlotFill>();
     return ctx;
   }
 
@@ -35,10 +39,7 @@ class RPContext extends ChangeNotifier {
     notifyListeners();
   }
 
-  Scenario createScenario(
-    String name, {
-    String description = '',
-  }) {
+  Scenario createScenario(String name, {String description = ''}) {
     final scenario = Scenario();
     scenario.name = name;
     scenario.description = description;
