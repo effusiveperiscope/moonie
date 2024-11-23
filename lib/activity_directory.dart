@@ -3,6 +3,7 @@ import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activities/3_webpage_to_knowledge_base.dart';
 import 'package:moonie/activities/4_knowledge_decomposer.dart';
 import 'package:moonie/activities/5_knowledge_browser.dart';
+import 'package:moonie/activities/6_roleplay.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/settings.dart';
@@ -15,10 +16,11 @@ class ActivityDirectory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<ActivityWidget> activities = [
+      RoleplayActivity(core: core),
       KnowledgeBrowser(core: core),
       Chat2Widget(core: core),
       WebpageToKnowledgeBase(core: core),
-      KnowledgeDecomposerWidget(core: core)
+      KnowledgeDecomposerWidget(core: core),
     ];
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

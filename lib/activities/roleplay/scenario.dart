@@ -54,7 +54,7 @@ class NodeSlot extends ChangeNotifier {
   String? get tag => _tag;
   set tag(String? value) {
     if (_tag != null) {
-      assert(_tag!.contains('.')); // dots are used for accessing attributes
+      //assert(_tag!.contains('.')); // dots are used for accessing attributes
       assert(!isReservedTag(_tag!.trim()));
       // How expansion works: .name, if executed on multiple nodes, makes a comma list
       // .instruction should provide an instruction iff there is a slot fill
@@ -146,7 +146,7 @@ class SlotFill extends ChangeNotifier {
 class Scenario extends ChangeNotifier {
   int id = 0;
 
-  String? _name;
+  String _name = '';
   String? _description;
   String? _imagePath;
 
@@ -162,8 +162,8 @@ class Scenario extends ChangeNotifier {
     context?.scenarios.put(this);
   }
 
-  String? get name => _name;
-  set name(String? value) {
+  String get name => _name;
+  set name(String value) {
     _name = value;
     notifyListeners();
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/activity.dart';
+import 'package:moonie/activities/commons.dart';
 import 'package:moonie/activities/knowledge_browser/node_editor.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
@@ -20,18 +21,9 @@ class KnowledgeBrowser extends ActivityWidget {
   State<KnowledgeBrowser> createState() => _KnowledgeBrowserState();
 }
 
-enum _SortMode {
-  alphabetical,
-  reverseAlphabetical,
-  created,
-  reverseCreated,
-  modified,
-  reverseModified,
-}
-
 class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
   BaseRole currentPage = BaseRole.character;
-  final sort = ValueNotifier(_SortMode.alphabetical);
+  final sort = ValueNotifier(SortMode.alphabetical);
   final PageController _pageController =
       PageController(initialPage: BaseRole.character.index);
   final _searchController = TextEditingController();
@@ -41,6 +33,7 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
   @override
   void dispose() {
     _pageController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -76,19 +69,19 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
                   child: DropdownMenu(
                     dropdownMenuEntries: const [
                       DropdownMenuEntry(
-                          label: 'A-Z', value: _SortMode.alphabetical),
+                          label: 'A-Z', value: SortMode.alphabetical),
                       DropdownMenuEntry(
-                          label: 'Z-A', value: _SortMode.reverseAlphabetical),
+                          label: 'Z-A', value: SortMode.reverseAlphabetical),
                       DropdownMenuEntry(
-                          label: 'created (desc)', value: _SortMode.created),
+                          label: 'created (desc)', value: SortMode.created),
                       DropdownMenuEntry(
                           label: 'created (asc)',
-                          value: _SortMode.reverseCreated),
+                          value: SortMode.reverseCreated),
                       DropdownMenuEntry(
-                          label: 'modified (desc)', value: _SortMode.modified),
+                          label: 'modified (desc)', value: SortMode.modified),
                       DropdownMenuEntry(
                           label: 'modified (asc)',
-                          value: _SortMode.reverseModified),
+                          value: SortMode.reverseModified),
                     ],
                     requestFocusOnTap: false,
                     textStyle: const TextStyle(
@@ -233,7 +226,7 @@ class _KnowledgePageState extends State<KnowledgePage> {
     return ChangeNotifierProvider.value(
       value: ctx,
       child:
-          Consumer3<RPContext, ValueNotifier<_SortMode>, TextEditingController>(
+          Consumer3<RPContext, ValueNotifier<SortMode>, TextEditingController>(
               builder: (context, rp, sort, search, _) {
         getNodes(context);
         var nodesSorted = nodes;
@@ -247,32 +240,32 @@ class _KnowledgePageState extends State<KnowledgePage> {
           nodesSorted = extraction.map((e) => e.choice).toList();
         }
         switch (sort.value) {
-          case _SortMode.alphabetical:
+          case SortMode.alphabetical:
             nodesSorted.sort((a, b) => a.name.compareTo(b.name));
-          case _SortMode.reverseAlphabetical:
+          case SortMode.reverseAlphabetical:
             nodesSorted.sort((a, b) => b.name.compareTo(a.name));
-          case _SortMode.created:
+          case SortMode.created:
             nodesSorted.sort((a, b) {
               if (a.created == null && b.created == null) return 0;
               if (a.created == null) return 1;
               if (b.created == null) return -1;
               return a.created!.compareTo(b.created!);
             });
-          case _SortMode.reverseCreated:
+          case SortMode.reverseCreated:
             nodesSorted.sort((a, b) {
               if (a.created == null && b.created == null) return 0;
               if (a.created == null) return 1;
               if (b.created == null) return -1;
               return b.created!.compareTo(a.created!);
             });
-          case _SortMode.modified:
+          case SortMode.modified:
             nodesSorted.sort((a, b) {
               if (a.modified == null && b.modified == null) return 0;
               if (a.modified == null) return 1;
               if (b.modified == null) return -1;
               return a.modified!.compareTo(b.modified!);
             });
-          case _SortMode.reverseModified:
+          case SortMode.reverseModified:
             nodesSorted.sort((a, b) {
               if (a.modified == null && b.modified == null) return 0;
               if (a.modified == null) return 1;

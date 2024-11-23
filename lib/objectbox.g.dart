@@ -606,8 +606,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (Scenario object, fb.Builder fbb) {
-          final nameOffset =
-              object.name == null ? null : fbb.writeString(object.name!);
+          final nameOffset = fbb.writeString(object.name);
           final descriptionOffset = object.description == null
               ? null
               : fbb.writeString(object.description!);
@@ -640,7 +639,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 ? null
                 : DateTime.fromMillisecondsSinceEpoch(modifiedValue)
             ..name = const fb.StringReader(asciiOptimization: true)
-                .vTableGetNullable(buffer, rootOffset, 10)
+                .vTableGet(buffer, rootOffset, 10, '')
             ..description = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 12)
             ..imagePath = const fb.StringReader(asciiOptimization: true)

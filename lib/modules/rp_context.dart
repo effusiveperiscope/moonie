@@ -85,13 +85,14 @@ class RPContext extends ChangeNotifier {
     return res;
   }
 
-  /// Not to be called directly exccept by BaseNode
-  /// (If not, then why not just put it inside BaseNode???)
-
-  // Right now the plan is just to spit the entire graph out into context
-  // If we want to look into more sophisticated solutions later,
-  // we could look into letting the LLM use some kind of tool to traverse the graph
-  // or something
+  List<Scenario> queryScenarios() {
+    return scenarios
+        .query()
+        .build()
+        .find()
+        .map((s) => s..context = this)
+        .toList();
+  }
 }
 
 enum BaseRole {
