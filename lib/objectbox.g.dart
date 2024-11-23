@@ -14,7 +14,7 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 
 import 'activities/roleplay/chat_entities.dart';
-import 'activities/roleplay/scenario.dart';
+import 'activities/roleplay/scenario_entities.dart';
 import 'modules/rp_entities.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file

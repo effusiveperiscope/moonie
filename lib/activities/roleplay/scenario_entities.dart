@@ -12,6 +12,7 @@ bool isReservedTag(String tag) => reservedTags.contains(tag);
 
 @Entity()
 class NodeSlot extends ChangeNotifier {
+  // Owning reference to SlotFill
   int id = 0;
 
   bool _isStringSlot = false;
@@ -44,6 +45,12 @@ class NodeSlot extends ChangeNotifier {
   set defaultStringFill(String? value) {
     assert(defaultFill.target == null);
     _defaultStringFill = value;
+    notifyListeners();
+  }
+
+  void resetDefaultFill() {
+    defaultFill.target = null;
+    defaultStringFill = null;
     notifyListeners();
   }
 
@@ -87,10 +94,27 @@ class NodeSlot extends ChangeNotifier {
     }
     return null;
   }
+
+  NodeSlot copy() {
+    final slot = NodeSlot();
+    slot.isStringSlot = isStringSlot;
+    slot.allowsMultiple = allowsMultiple;
+    slot.tag = tag;
+    slot.role = role;
+    if (defaultFill.target != null) {
+      slot.defaultFill.target = defaultFill.target!.copy();
+    }
+    slot.defaultStringFill = defaultStringFill;
+    slot.context = context!;
+    slot.id = context!.slots.put(slot);
+    context!.notifyListeners();
+    return slot;
+  }
 }
 
 @Entity()
 class SlotFill extends ChangeNotifier {
+  // Non-owning references to BaseNode and NodeSlot
   int id = 0;
 
   @Transient()
@@ -142,10 +166,20 @@ class SlotFill extends ChangeNotifier {
     }
     return true;
   }
+
+  SlotFill copy() {
+    final newFill = SlotFill()..slot.target = slot.target;
+    newFill.content = content;
+    newFill.nodes.addAll(nodes);
+    newFill.id = 0;
+    context!.slotFills.put(newFill);
+    return newFill;
+  }
 }
 
 @Entity()
 class Scenario extends ChangeNotifier {
+  // Owning references to NodeSlot and RPChat
   int id = 0;
 
   String _name = '';
@@ -228,6 +262,21 @@ class Scenario extends ChangeNotifier {
     chats.add(chat);
     notifyListeners();
     return chat;
+  }
+
+  Scenario copy() {
+    final scenario = Scenario();
+    scenario.name = name;
+    scenario.description = description;
+    scenario.imagePath = imagePath;
+    scenario.created = DateTime.now();
+    scenario.modified = modified;
+    scenario.slots.addAll(slots.map((e) => e.copy()));
+    scenario.chats.addAll(chats.map((e) => e.copy()));
+    scenario.context = context!;
+    scenario.id = context!.scenarios.put(scenario);
+    context!.notifyListeners();
+    return scenario;
   }
 
   // Probably make this more sophisticated later

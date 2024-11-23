@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:moonie/activities/2_chat2.dart';
 import 'package:moonie/activities/activity.dart';
 import 'package:moonie/activities/commons.dart';
-import 'package:moonie/activities/roleplay/scenario.dart';
+import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/utils.dart';
@@ -190,8 +190,6 @@ class _RoleplaySetupState extends State<RoleplaySetup> {
                   scenarios.clear();
                   scenarios.addAll(extraction.map((e) => e.choice));
                 }
-                scenarios.sort();
-
                 switch (sort.value) {
                   case SortMode.alphabetical:
                     scenarios.sort((a, b) => a.name.compareTo(b.name));
@@ -296,7 +294,7 @@ class ScenarioDisplayWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 IconButton.outlined(
                   onPressed: () {
-                    throw UnimplementedError();
+                    scenario.copy();
                   },
                   icon: const Icon(Icons.copy),
                   visualDensity: VisualDensity.compact,

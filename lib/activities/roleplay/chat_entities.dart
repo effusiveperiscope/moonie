@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:langchain/langchain.dart';
-import 'package:moonie/activities/roleplay/scenario.dart';
+import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
@@ -11,6 +11,8 @@ import 'package:collection/collection.dart';
 
 @Entity()
 class RPChat extends ChangeNotifier {
+  // Owning references to SlotFill and RPChatMessage
+  // Non-owning reference to Scenario
   int id = 0;
   @Transient()
   RPContext? context;
@@ -38,6 +40,10 @@ class RPChat extends ChangeNotifier {
     return fill;
   }
 
+  List<SlotFill> getFills() {
+    return fills.map((m) => m..context = context!).toList();
+  }
+
   RPChatMessage createMessage(
     ChatMessageType type,
     String text,
@@ -61,10 +67,21 @@ class RPChat extends ChangeNotifier {
   List<RPChatMessage> getMessages() {
     return messages.map((m) => RPChatMessage()..chat.target = this).toList();
   }
+
+  RPChat copy() {
+    final chat = RPChat()..context = context!;
+    chat.created = DateTime.now();
+    chat.messages.addAll(getMessages().map((e) => e.copy()));
+    chat.scenario.target = scenario.target;
+    chat.fills.addAll(getFills().map((e) => e.copy()));
+    chat.id = context!.chats.put(chat);
+    return chat;
+  }
 }
 
 @Entity()
 class RPChatMessage extends ChangeNotifier {
+  // Non-owning reference to RPChat
   int id = 0;
   ChatMessageType _type = ChatMessageType.human;
   String _text = '';
@@ -193,5 +210,19 @@ class RPChatMessage extends ChangeNotifier {
 
   String toPlainText() {
     return '${name(showModel: false)}: $text';
+  }
+
+  RPChatMessage copy() {
+    final mes = RPChatMessage();
+    mes.type = type;
+    mes.text = text;
+    mes.complete = complete;
+    mes.model = model;
+    mes.chat.target = chat.target;
+    mes.imageFile = imageFile;
+    mes.imageBase64 = imageBase64;
+    mes.id = 0;
+    context!.chatMessages.put(mes);
+    return mes;
   }
 }
