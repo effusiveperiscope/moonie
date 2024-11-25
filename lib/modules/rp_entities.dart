@@ -15,6 +15,7 @@ LinkedHashSet<BaseNode> nodeHashSet() => LinkedHashSet<BaseNode>(
 /// A base node of the context graph. Typically a character or a world etc.
 @Entity()
 class BaseNode extends ChangeNotifier {
+  // Owning references to attributes
   int id = 0;
 
   int role = BaseRole.extra.index;
@@ -138,6 +139,7 @@ class BaseNode extends ChangeNotifier {
     attributes.remove(attr);
     refreshAttributePositions();
     notifyListeners();
+    context!.attributes.remove(attr.id);
   }
 
   void refreshAttributePositions({List<AttributeComponent>? override}) {

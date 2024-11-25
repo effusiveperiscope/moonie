@@ -61,6 +61,7 @@ class RPChat extends ChangeNotifier {
   void deleteMessage(RPChatMessage mes) {
     messages.remove(mes);
     notifyListeners();
+    context!.chatMessages.remove(mes.id);
   }
 
   List<RPChatMessage> getMessages() {

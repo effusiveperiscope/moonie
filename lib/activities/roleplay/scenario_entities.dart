@@ -46,8 +46,10 @@ class NodeSlot extends ChangeNotifier {
   }
 
   void removeDefaultFill() {
+    final oldTarget = defaultFill.target;
     defaultFill.target = null;
     notifyListeners();
+    if (oldTarget != null) context!.slotFills.remove(oldTarget.id);
   }
 
   // String/node fills should be mutually exclusive
@@ -273,8 +275,9 @@ class Scenario extends ChangeNotifier {
 
   void removeSlot(NodeSlot slot) {
     slots.remove(slot);
-    context!.slots.remove(slot.id);
+    // Doing the box removal before the ToMany update seems to break objectbox
     notifyListeners();
+    context!.slots.remove(slot.id);
   }
 
   List<NodeSlot> getSlots() => slots.map((m) => m..context = context!).toList();
