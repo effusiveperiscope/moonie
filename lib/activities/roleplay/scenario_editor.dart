@@ -234,9 +234,12 @@ class _AddSlotDialogState extends State<AddSlotDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final test = widget.scenario.testTagOk(slotTag);
     return AlertDialog(
       title: Text('Add slot (role: ${baseRoleNames[widget.role]!})'),
       content: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             decoration: const InputDecoration(
@@ -247,9 +250,8 @@ class _AddSlotDialogState extends State<AddSlotDialog> {
               });
             },
           ),
-          if (widget.scenario.testSlot(slotTag))
-            const Text('Tag already exists',
-                style: TextStyle(color: Colors.red)),
+          if (!test.$2 && slotTag.isNotEmpty)
+            Text(test.$1!, style: const TextStyle(color: Colors.red)),
         ],
       ),
       actions: [
@@ -260,7 +262,7 @@ class _AddSlotDialogState extends State<AddSlotDialog> {
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: (!widget.scenario.testSlot(slotTag))
+          onPressed: (test.$2)
               ? () {
                   if (slotTag.isNotEmpty) {
                     widget.scenario.createSlot(slotTag, widget.role);
@@ -321,17 +323,18 @@ class _SlotDisplayWidgetState extends State<SlotDisplayWidget> {
                   decoration: InputDecoration(
                     labelText: 'Tag',
                     errorText: (errorMessage.isNotEmpty) ? errorMessage : null,
+                    errorMaxLines: 2,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   onChanged: (value) {
-                    if (widget.scenario.testSlot(value) &&
-                        value != widget.slot.tag) {
-                      setState(() {
-                        errorMessage = 'Tag already exists';
+                    final test = widget.scenario
+                        .testTagOk(value, oldTag: widget.slot.tag);
+                    if (!test.$2) {
+                      return setState(() {
+                        errorMessage = test.$1!;
                       });
-                      return;
                     }
                     setState(() {
                       widget.slot.tag = value;

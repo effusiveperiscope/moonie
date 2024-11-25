@@ -226,3 +226,8 @@ String sanitizeTagName(String input) {
 
   return ret;
 }
+
+bool testXMLTagName(String tag) {
+  RegExp tagExp = RegExp(r'^[A-Za-z_][A-Za-z0-9._-]*$');
+  return tagExp.hasMatch(tag);
+}

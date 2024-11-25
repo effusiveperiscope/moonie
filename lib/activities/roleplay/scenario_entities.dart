@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
+import 'package:moonie/utils.dart';
 import 'package:objectbox/objectbox.dart';
 
 Set<String> reservedTags = {'condition', 'messages', 'instructions', 'prompt'};
@@ -269,6 +270,15 @@ class Scenario extends ChangeNotifier {
   final chats = ToMany<RPChat>();
 
   bool testSlot(String tag) => slots.any((slot) => slot.tag == tag);
+
+  (String?, bool) testTagOk(String tag, {String? oldTag}) {
+    if (testSlot(tag) && tag != oldTag) {
+      return ("Slot with tag '$tag' already exists", false);
+    } else if (!testXMLTagName(tag)) {
+      return ("Slot tag is not valid XML tag", false);
+    }
+    return (null, true);
+  }
 
   NodeSlot createSlot(String tag, BaseRole role,
       {bool isStringSlot = false, bool allowsMultiple = false}) {
