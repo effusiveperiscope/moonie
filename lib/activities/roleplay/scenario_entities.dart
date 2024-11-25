@@ -321,6 +321,8 @@ class Scenario extends ChangeNotifier {
     context!.slots.remove(slot.id);
   }
 
+  List<RPChat> getChats() => chats.map((c) => c..context = context!).toList();
+
   List<NodeSlot> getSlots() => slots.map((m) => m..context = context!).toList();
 
   List<String> knownTags() {
@@ -353,8 +355,9 @@ class Scenario extends ChangeNotifier {
     scenario.imagePath = imagePath;
     scenario.created = DateTime.now();
     scenario.modified = modified;
-    scenario.slots.addAll(slots.map((e) => e.copy()));
-    scenario.chats.addAll(chats.map((e) => e.copy()));
+    scenario.slots.addAll(getSlots().map((e) => e.copy()));
+    // Don't copy chats (probably?)
+    //scenario.chats.addAll(getChats().map((e) => e.copy()));
     scenario.context = context!;
     scenario.id = context!.scenarios.put(scenario);
     context!.notifyListeners();
