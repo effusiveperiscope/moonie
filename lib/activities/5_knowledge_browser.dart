@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,10 +11,39 @@ import 'package:moonie/modules/rp_entities.dart';
 import 'package:provider/provider.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fw;
 
+class NodeSelectController extends ChangeNotifier {
+  LinkedHashSet<BaseNode> selectedNodes = nodeHashSet();
+
+  void addNode(BaseNode node) {
+    selectedNodes.add(node);
+    notifyListeners();
+  }
+
+  void removeNode(BaseNode node) {
+    selectedNodes.remove(node);
+    notifyListeners();
+  }
+
+  bool isSelected(BaseNode node) => selectedNodes.contains(node);
+  int count() => selectedNodes.length;
+
+  void clear() {
+    selectedNodes.clear();
+    notifyListeners();
+  }
+}
+
 class KnowledgeBrowser extends ActivityWidget {
-  const KnowledgeBrowser({super.key, required MoonieCore core})
+  final NodeSelectController? nodeSelectController;
+  final BaseRole? lockedPage;
+  final bool dialogMode;
+  const KnowledgeBrowser(
+      {super.key,
+      required super.core,
+      this.lockedPage,
+      this.dialogMode = false,
+      this.nodeSelectController})
       : super(
-            core: core,
             name: "Knowledge Browser",
             description: "Browse and edit knowledge nodes");
 
@@ -22,13 +52,23 @@ class KnowledgeBrowser extends ActivityWidget {
 }
 
 class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
-  BaseRole currentPage = BaseRole.character;
+  late BaseRole currentPage;
   final sort = ValueNotifier(SortMode.alphabetical);
   final PageController _pageController =
       PageController(initialPage: BaseRole.character.index);
   final _searchController = TextEditingController();
 
   //ValueNotifier<> sort mode
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.lockedPage != null) {
+      currentPage = widget.lockedPage!;
+    } else {
+      currentPage = BaseRole.character;
+    }
+  }
 
   @override
   void dispose() {
@@ -47,13 +87,22 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ActionChip(
-                  avatar: const Icon(Icons.add),
-                  label: const Text("Node"),
-                  onPressed: () {
-                    addNodeDialog(widget.core);
-                  },
-                ),
+                if (!widget.dialogMode)
+                  ActionChip(
+                    avatar: const Icon(Icons.add),
+                    label: const Text("Node"),
+                    onPressed: () {
+                      addNodeDialog(widget.core);
+                    },
+                  ),
+                if (widget.dialogMode)
+                  ActionChip(
+                    avatar: const Icon(Icons.clear),
+                    label: const Text("Clear selection"),
+                    onPressed: () {
+                      widget.nodeSelectController?.clear();
+                    },
+                  ),
                 const SizedBox(width: 8),
                 // ActionChip(
                 // label: const Icon(Icons.delete, size: 20),
@@ -98,27 +147,28 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                DropdownMenu(
-                  width: 130,
-                  requestFocusOnTap: false,
-                  dropdownMenuEntries: [
-                    for (final e in baseRoleNames.entries)
-                      DropdownMenuEntry(label: e.value, value: e.key)
-                  ],
-                  label: const Text("Role"),
-                  textStyle: const TextStyle(
-                    fontSize: 12,
+                if (widget.lockedPage == null)
+                  DropdownMenu(
+                    width: 130,
+                    requestFocusOnTap: false,
+                    dropdownMenuEntries: [
+                      for (final e in baseRoleNames.entries)
+                        DropdownMenuEntry(label: e.value, value: e.key)
+                    ],
+                    label: const Text("Role"),
+                    textStyle: const TextStyle(
+                      fontSize: 12,
+                    ),
+                    initialSelection: currentPage,
+                    inputDecorationTheme:
+                        const InputDecorationTheme(isDense: true),
+                    onSelected: (value) {
+                      setState(() {
+                        currentPage = value!;
+                        _pageController.jumpToPage(currentPage.index);
+                      });
+                    },
                   ),
-                  initialSelection: currentPage,
-                  inputDecorationTheme:
-                      const InputDecorationTheme(isDense: true),
-                  onSelected: (value) {
-                    setState(() {
-                      currentPage = value!;
-                      _pageController.jumpToPage(currentPage.index);
-                    });
-                  },
-                ),
               ],
             ),
           ),
@@ -135,11 +185,17 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
             child: PageView.builder(
                 controller: _pageController,
                 itemBuilder: (context, idx) {
-                  return MultiProvider(providers: [
-                    ChangeNotifierProvider.value(value: widget.core),
-                    ChangeNotifierProvider.value(value: sort),
-                    ChangeNotifierProvider.value(value: _searchController)
-                  ], child: KnowledgePage(role: currentPage));
+                  return MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider.value(value: widget.core),
+                        ChangeNotifierProvider.value(value: sort),
+                        ChangeNotifierProvider.value(value: _searchController)
+                      ],
+                      child: KnowledgePage(
+                        role: currentPage,
+                        dialogMode: widget.dialogMode,
+                        nodeSelectController: widget.nodeSelectController,
+                      ));
                 },
                 itemCount: BaseRole.values.length),
           )
@@ -200,7 +256,13 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
 
 class KnowledgePage extends StatefulWidget {
   final BaseRole role;
-  const KnowledgePage({required this.role, super.key});
+  final bool dialogMode;
+  final NodeSelectController? nodeSelectController;
+  const KnowledgePage(
+      {required this.role,
+      required this.dialogMode,
+      super.key,
+      this.nodeSelectController});
 
   @override
   State<KnowledgePage> createState() => _KnowledgePageState();
@@ -298,67 +360,87 @@ class _KnowledgePageState extends State<KnowledgePage> {
                             ),
                           ),
                           const Spacer(),
-                          IconButton.outlined(
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) =>
-                                    ChangeNotifierProvider.value(
-                                  value: core,
-                                  child: NodeEditor(node: node),
-                                ),
-                              ));
-                            },
-                            icon: const Icon(Icons.edit),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton.outlined(
-                            // Copy
-                            onPressed: () {
-                              node.copy();
-                            },
-                            icon: const Icon(Icons.copy),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          const SizedBox(width: 8),
-                          // IconButton.outlined(
-                          //// Export
-                          // onPressed: () {},
-                          // icon: const Icon(Icons.upgrade),
-                          // visualDensity: VisualDensity.compact,
-                          // ),
-                          const SizedBox(width: 8),
-                          IconButton.outlined(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text('Delete'),
-                                    content: Text(
-                                        'Are you sure you want to delete ${node.name}?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          rp.deleteNode(node);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            icon: const Icon(Icons.delete),
-                            visualDensity: VisualDensity.compact,
-                          ),
+                          if (!widget.dialogMode) ...[
+                            IconButton.outlined(
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      ChangeNotifierProvider.value(
+                                    value: core,
+                                    child: NodeEditor(node: node),
+                                  ),
+                                ));
+                              },
+                              icon: const Icon(Icons.edit),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton.outlined(
+                              // Copy
+                              onPressed: () {
+                                node.copy();
+                              },
+                              icon: const Icon(Icons.copy),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            const SizedBox(width: 8),
+                            // IconButton.outlined(
+                            //// Export
+                            // onPressed: () {},
+                            // icon: const Icon(Icons.upgrade),
+                            // visualDensity: VisualDensity.compact,
+                            // ),
+                            const SizedBox(width: 8),
+                            IconButton.outlined(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text('Delete'),
+                                      content: Text(
+                                          'Are you sure you want to delete ${node.name}?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            rp.deleteNode(node);
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.delete),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
+                          if (widget.dialogMode &&
+                              widget.nodeSelectController != null)
+                            ChangeNotifierProvider.value(
+                              value: widget.nodeSelectController,
+                              child: Consumer<NodeSelectController>(
+                                  builder: (context, controller, _) {
+                                return Checkbox(
+                                  value: controller.isSelected(node),
+                                  onChanged: (value) {
+                                    if (value == true) {
+                                      controller.addNode(node);
+                                    } else {
+                                      controller.removeNode(node);
+                                    }
+                                  },
+                                );
+                              }),
+                            ),
                           const SizedBox(width: 16),
                           CircleAvatar(
                             radius: 16,

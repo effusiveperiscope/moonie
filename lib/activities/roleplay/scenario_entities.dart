@@ -6,13 +6,13 @@ import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
 import 'package:objectbox/objectbox.dart';
 
-Set<String> reservedTags = {'condition', 'messages', 'instructions'};
+Set<String> reservedTags = {'condition', 'messages', 'instructions', 'prompt'};
 
 bool isReservedTag(String tag) => reservedTags.contains(tag);
 
 @Entity()
 class NodeSlot extends ChangeNotifier {
-  // Owning reference to SlotFill
+  // Owning reference to SlotFill (defaultFill only)
   int id = 0;
 
   bool _isStringSlot = false;
@@ -32,6 +32,22 @@ class NodeSlot extends ChangeNotifier {
   void notifyListeners() {
     super.notifyListeners();
     context?.slots.put(this);
+  }
+
+  void createDefaultFill(List<BaseNode> nodes) {
+    assert(_defaultStringFill == null);
+    final fill = SlotFill();
+    fill.context = context!;
+    fill.slot.target = this;
+    fill.nodes.addAll(nodes);
+    fill.id = context!.slotFills.put(fill);
+    defaultFill.target = fill;
+    notifyListeners();
+  }
+
+  void removeDefaultFill() {
+    defaultFill.target = null;
+    notifyListeners();
   }
 
   // String/node fills should be mutually exclusive
@@ -85,6 +101,8 @@ class NodeSlot extends ChangeNotifier {
     notifyListeners();
   }
 
+  BaseRole getRole() => _role;
+
   dynamic getDefaultFill() {
     if (defaultStringFill != null) {
       return defaultStringFill!;
@@ -120,6 +138,7 @@ class SlotFill extends ChangeNotifier {
   @Transient()
   RPContext? context;
 
+  // Unused I think
   String? _content;
 
   @override
@@ -133,7 +152,9 @@ class SlotFill extends ChangeNotifier {
 
   String? get content => _content;
   set content(String? value) {
-    assert(slot.target?.isStringSlot == true);
+    if (value != null) {
+      assert(slot.target?.isStringSlot == true);
+    }
     _content = value;
     notifyListeners();
   } // only for string fills
@@ -249,6 +270,14 @@ class Scenario extends ChangeNotifier {
     notifyListeners();
     return slot;
   }
+
+  void removeSlot(NodeSlot slot) {
+    slots.remove(slot);
+    context!.slots.remove(slot.id);
+    notifyListeners();
+  }
+
+  List<NodeSlot> getSlots() => slots.map((m) => m..context = context!).toList();
 
   @Transient()
   RPContext? context;

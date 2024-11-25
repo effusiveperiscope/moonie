@@ -1,9 +1,16 @@
 // ignore_for_file: unnecessary_getters_setters
 
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:moonie/utils.dart';
+
+LinkedHashSet<BaseNode> nodeHashSet() => LinkedHashSet<BaseNode>(
+      equals: (p0, p1) => p0.id == p1.id,
+      hashCode: (p0) => p0.id.hashCode,
+    );
 
 /// A base node of the context graph. Typically a character or a world etc.
 @Entity()

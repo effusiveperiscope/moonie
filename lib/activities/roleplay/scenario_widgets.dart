@@ -196,7 +196,8 @@ class _ScenarioBrowserState extends State<ScenarioBrowser> {
 
                 return Column(
                   children: [
-                    for (final s in scenarios) ScenarioDisplayWidget(s, ctx),
+                    for (final s in scenarios)
+                      ScenarioDisplayWidget(s, widget.core),
                   ],
                 );
               }))
@@ -208,8 +209,8 @@ class _ScenarioBrowserState extends State<ScenarioBrowser> {
 
 class ScenarioDisplayWidget extends StatelessWidget {
   final Scenario scenario;
-  final RPContext ctx;
-  const ScenarioDisplayWidget(this.scenario, this.ctx, {super.key});
+  final MoonieCore core;
+  const ScenarioDisplayWidget(this.scenario, this.core, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +258,8 @@ class ScenarioDisplayWidget extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (_) => ChangeNotifierProvider.value(
-                            value: scenario, child: ScenarioEditor(scenario))));
+                            value: scenario,
+                            child: ScenarioEditor(scenario, core))));
                   },
                   icon: const Icon(Icons.edit),
                   visualDensity: VisualDensity.compact,
@@ -289,6 +291,7 @@ class ScenarioDisplayWidget extends StatelessWidget {
   }
 
   IconButton deleteButton(BuildContext context, Scenario scenario) {
+    final RPContext ctx = core.rpContext;
     return IconButton.outlined(
       onPressed: () {
         showDialog(
