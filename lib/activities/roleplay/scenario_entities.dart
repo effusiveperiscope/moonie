@@ -7,7 +7,19 @@ import 'package:moonie/modules/rp_entities.dart';
 import 'package:moonie/utils.dart';
 import 'package:objectbox/objectbox.dart';
 
-Set<String> reservedTags = {'condition', 'messages', 'instructions', 'prompt'};
+/// Reserved tags include those with an actual function (condition)
+/// as well as common tags for prompt engineering as specified by Anthropic/Claude
+/// https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags
+Set<String> reservedTags = {
+  'condition',
+  'messages',
+  'instructions',
+  'prompt',
+  'formatting',
+  'example',
+  'thinking',
+  'answer'
+};
 
 bool isReservedTag(String tag) => reservedTags.contains(tag);
 
@@ -276,6 +288,8 @@ class Scenario extends ChangeNotifier {
       return ("Slot with tag '$tag' already exists", false);
     } else if (!testXMLTagName(tag)) {
       return ("Slot tag is not valid XML tag", false);
+    } else if (isReservedTag(tag)) {
+      return ("Tag name '$tag' is reserved", false);
     }
     return (null, true);
   }
