@@ -27,28 +27,28 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 Prompts are in XML and start with a root-level `<prompt>` element, which will be stripped (?) when the actual prompt is sent to the model. (In the scenario editing interface, the `<prompt>` element does not need to be explicitly written out; it will be automatically filled in at prompt time.)
 
 User-specified empty elements can be used, representing a NodeSlot with the associated tag:
-```
-	<character/>
-    <character get="name"/>
+```xml
+<character/>
+<character get="name"/>
 ```
 
 Some tags are reserved for the following purposes: 
 * Elements used for control flow
-```
-	<condition nodeFilled="character"></condition>
-	<messages/>
+```xml
+<condition nodeFilled="character"></condition>
+<messages/>
 ```
 * Common prompt engineering elements, passed verbatim to the LLM:
-```
-	<instructions></instructions>
-	<formatting></formatting>
-	<example></example>
-	<thinking></thinking>
+```xml
+<instructions></instructions>
+<formatting></formatting>
+<example></example>
+<thinking></thinking>
 ```
 * Reserved for future use
-```
-	<random></random>
-	<randomchoice></randomchoice>
+```xml
+<random></random>
+<randomchoice></randomchoice>
 ```
 
 # Installation
