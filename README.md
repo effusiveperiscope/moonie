@@ -34,6 +34,8 @@ User-specified empty elements can be used, representing a slot with the associat
 Some tags are reserved for the following purposes: 
 * Elements used for control flow
 ```xml
+<prompt></prompt>
+<greeting></greeting>
 <condition nodeFilled="character"></condition>
 <messages/>
 ```
@@ -49,6 +51,36 @@ Some tags are reserved for the following purposes:
 <random></random>
 <randomchoice></randomchoice>
 ```
+
+Here is an example of a fully formed prompt:
+```xml
+<prompt>
+You are engaging in an interactive roleplay scenario with the user, <user/>. 
+
+Primary characters (key participants): 
+<character get="name"/>.
+Character info: 
+<character/>
+User info: 
+<user/>
+World info: 
+<world/>
+
+Current conversation:
+<messages/>
+
+<instructions>
+- Continue the roleplay naturally, staying in character based on the provided context.
+- Maintain the tone and pacing of the previous messages.
+Additional rules: 
+<rules/>
+
+In plaintext, write your next response to progress the roleplay.
+</instructions>
+</prompt>
+```
+
+Greeting messages can use similar XML substitutions, but use the root-level element  `<greeting>`.
 
 # Installation
 - Depends on rust for `rhttp` client (this is to get around a problem with the standard library's cookie handling) [rustup](https://rustup.rs/)
