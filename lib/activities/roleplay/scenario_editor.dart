@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/activities/roleplay/node_select.dart';
 import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/core.dart';
@@ -10,7 +12,7 @@ import 'package:moonie/widgets/croppable_image2.dart';
 import 'package:moonie/widgets/prompt_edit.dart';
 import 'package:provider/provider.dart';
 
-enum _ScenarioEditorTab { slots, prompts }
+enum _ScenarioEditorTab { slots, prompts, greetings }
 
 class ScenarioEditor extends StatefulWidget {
   final Scenario scenario;
@@ -101,9 +103,12 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                                   value: _ScenarioEditorTab.slots,
                                 ),
                                 ButtonSegment(
-                                  label: Text('Prompts'),
+                                  label: Text('Prompt'),
                                   value: _ScenarioEditorTab.prompts,
                                 ),
+                                ButtonSegment(
+                                    value: _ScenarioEditorTab.greetings,
+                                    label: Text('Greetings')),
                               ],
                               selected: selectedTabs,
                               onSelectionChanged: (s) {
@@ -144,6 +149,8 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                     SlotsPage(widget.core, scenario: widget.scenario),
                   if (selectedTabs.contains(_ScenarioEditorTab.prompts))
                     PromptPage(widget.scenario, widget.core),
+                  if (selectedTabs.contains(_ScenarioEditorTab.greetings))
+                    GreetingsPage(widget.scenario, widget.core)
                 ],
               );
             }),
@@ -510,6 +517,161 @@ class _PromptPageState extends State<PromptPage> {
               },
             )),
       ],
+    );
+  }
+}
+
+class GreetingsPage extends StatefulWidget {
+  final Scenario scenario;
+  final MoonieCore core;
+  const GreetingsPage(this.scenario, this.core, {super.key});
+
+  @override
+  State<GreetingsPage> createState() => _GreetingsPageState();
+}
+
+class _GreetingsPageState extends State<GreetingsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            ActionChip(
+                label: const Text("Add greeting"),
+                avatar: const Icon(Icons.add),
+                onPressed: () {
+                  widget.scenario.createGreeting();
+                }),
+          ],
+        ),
+        for (final greeting in widget.scenario.greetings)
+          GreetingWidget(widget.scenario, greeting)
+      ],
+    );
+  }
+}
+
+class GreetingWidget extends StatefulWidget {
+  final Scenario scenario;
+  final RPChatMessage greeting;
+  const GreetingWidget(this.scenario, this.greeting, {super.key});
+
+  @override
+  State<GreetingWidget> createState() => _GreetingWidgetState();
+}
+
+class _GreetingWidgetState extends State<GreetingWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: widget.greeting,
+      child: Consumer<RPChatMessage>(builder: (context, message, _) {
+        return Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: Text(
+                      message.text.isEmpty ? '(empty)' : message.text,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Spacer(),
+                  ActionChip(
+                    label: const Text("Edit"),
+                    avatar: const Icon(Icons.edit),
+                    onPressed: () {
+                      editGreetingDialog(context);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ActionChip(
+                      label: const Text("Delete"),
+                      avatar: const Icon(Icons.delete),
+                      onPressed: () {
+                        deleteGreetingDialog(context);
+                      }),
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Future editGreetingDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          String greetingText = widget.greeting.text;
+          TextEditingController greetingController = TextEditingController(
+            text: greetingText,
+          );
+          return AlertDialog(
+              title: const Text('Edit greeting'),
+              content: SizedBox(
+                width: 400,
+                child: TextField(
+                  controller: greetingController,
+                  decoration: const InputDecoration(
+                    labelText: 'Greeting',
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: null,
+                  minLines: 9,
+                  style: const TextStyle(
+                    fontSize: 12,
+                  ),
+                  onChanged: (value) {
+                    greetingText = value;
+                    widget.greeting.text = greetingText;
+                  },
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Exit'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ]);
+        });
+  }
+
+  Future<dynamic> deleteGreetingDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: Text(
+              'Are you sure you want to delete greeting: ${widget.greeting.text.substring(0, min(20, widget.greeting.text.length))}?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                widget.scenario.deleteGreeting(widget.greeting);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

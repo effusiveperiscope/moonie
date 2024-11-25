@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_getters_setters
 
 import 'package:flutter/material.dart';
+import 'package:langchain/langchain.dart';
 import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/modules/rp_entities.dart';
@@ -218,6 +219,7 @@ class SlotFill extends ChangeNotifier {
 @Entity()
 class Scenario extends ChangeNotifier {
   // Owning references to NodeSlot and RPChat
+  // Owning reference to RPChatMessage (only for greetings)
   int id = 0;
 
   String _name = '';
@@ -282,6 +284,7 @@ class Scenario extends ChangeNotifier {
 
   final slots = ToMany<NodeSlot>();
   final chats = ToMany<RPChat>();
+  final greetings = ToMany<RPChatMessage>();
 
   bool testSlot(String tag) => slots.any((slot) => slot.tag == tag);
 
@@ -356,6 +359,23 @@ class Scenario extends ChangeNotifier {
     scenario.id = context!.scenarios.put(scenario);
     context!.notifyListeners();
     return scenario;
+  }
+
+  RPChatMessage createGreeting() {
+    final mes = RPChatMessage();
+    mes.type = ChatMessageType.ai.index;
+    mes.text = '';
+    mes.context = context!;
+    mes.id = context!.chatMessages.put(mes);
+    greetings.add(mes);
+    notifyListeners();
+    return mes;
+  }
+
+  void deleteGreeting(RPChatMessage mes) {
+    greetings.remove(mes);
+    notifyListeners();
+    context!.chatMessages.remove(mes.id);
   }
 
   // Probably make this more sophisticated later
