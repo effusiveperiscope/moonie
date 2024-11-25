@@ -9,7 +9,6 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 ### RP Context
 - A **base node** is a unit of information that the user can hotswap for roleplay context, such as a character.
 - An **attribute** can be attached to a node, providing further information on that node.
-
 - A **scenario** is analogous to a SillyTavern card, and can contain multiple **chats**.
 - Each scenario may define multiple **slots**. 
 - Each slot can be filled using a **slot fill**. 
@@ -26,7 +25,7 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 ## Prompt XML
 Prompts are in XML and start with a root-level `<prompt>` element, which will be stripped (?) when the actual prompt is sent to the model. (In the scenario editing interface, the `<prompt>` element does not need to be explicitly written out; it will be automatically filled in at prompt time.)
 
-User-specified empty elements can be used, representing a NodeSlot with the associated tag:
+User-specified empty elements can be used, representing a slot with the associated tag:
 ```xml
 <character/>
 <character get="name"/>
