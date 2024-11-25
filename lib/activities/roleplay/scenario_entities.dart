@@ -12,6 +12,8 @@ import 'package:objectbox/objectbox.dart';
 /// https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/use-xml-tags
 Set<String> reservedTags = {
   'condition',
+  'random',
+  'randomchoice',
   'messages',
   'instructions',
   'prompt',
@@ -318,6 +320,15 @@ class Scenario extends ChangeNotifier {
 
   List<NodeSlot> getSlots() => slots.map((m) => m..context = context!).toList();
 
+  List<String> knownTags() {
+    final tags = <String>[];
+    for (final slot in slots) {
+      if (slot.tag == null) continue;
+      tags.add(slot.tag!);
+    }
+    return tags;
+  }
+
   @Transient()
   RPContext? context;
 
@@ -349,25 +360,25 @@ class Scenario extends ChangeNotifier {
 
   // Probably make this more sophisticated later
   static const String basePrompt = '''
-You are engaging in an interactive roleplay scenario with the user, <user>. 
+You are engaging in an interactive roleplay scenario with the user, <user/>. 
 
 Primary characters (key participants): 
-<character get="name">.
+<character get="name"/>.
 Character info: 
-<character>
+<character/>
 User info: 
-<user>
+<user/>
 World info: 
-<world>
+<world/>
 
 Current conversation:
-<messages>
+<messages/>
 
 <instructions>
 - Continue the roleplay naturally, staying in character based on the provided context.
 - Maintain the tone and pacing of the previous messages.
 Additional rules: 
-<rules>
+<rules/>
 
 In plaintext, write your next response to progress the roleplay.
 </instructions>

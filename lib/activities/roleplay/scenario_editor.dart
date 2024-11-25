@@ -7,6 +7,7 @@ import 'package:moonie/core.dart';
 import 'package:moonie/modules/rp_context.dart';
 import 'package:moonie/utils.dart';
 import 'package:moonie/widgets/croppable_image2.dart';
+import 'package:moonie/widgets/prompt_edit.dart';
 import 'package:provider/provider.dart';
 
 enum _ScenarioEditorTab { slots, prompts }
@@ -449,12 +450,18 @@ class PromptPage extends StatefulWidget {
 }
 
 class _PromptPageState extends State<PromptPage> {
-  late final TextEditingController promptController;
+  late final PromptEditingController promptController;
 
   @override
   void initState() {
     super.initState();
-    promptController = TextEditingController(text: widget.scenario.prompt);
+    promptController = PromptEditingController(
+      text: widget.scenario.prompt,
+      knownTags: widget.scenario.knownTags(),
+      matchedTagStyle: const TextStyle(color: Colors.green),
+      unmatchedTagStyle: const TextStyle(color: Colors.red),
+      reservedTagStyle: const TextStyle(color: Colors.cyan),
+    );
   }
 
   @override
@@ -465,23 +472,44 @@ class _PromptPageState extends State<PromptPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          controller: promptController,
-          decoration: const InputDecoration(
-            labelText: 'Prompt',
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            border: OutlineInputBorder(),
-          ),
-          maxLines: null,
-          minLines: 9,
-          style: const TextStyle(
-            fontSize: 14,
-          ),
-          onChanged: (value) {
-            widget.scenario.setPrompt(value);
-          },
-        ));
+    return Column(
+      children: [
+        SizedBox(
+          height: 16,
+          child: ChangeNotifierProvider.value(
+              value: promptController,
+              child: Consumer<PromptEditingController>(
+                  builder: (context, controller, _) {
+                return (controller.unmatchedTags.isNotEmpty)
+                    ? Text(
+                        'Unmatched tags: ${Set.from(controller.unmatchedTags).join(', ')}',
+                        style: const TextStyle(color: Colors.red, fontSize: 10),
+                      )
+                    : const Text('', style: TextStyle(fontSize: 10));
+              })),
+        ),
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: promptController,
+              decoration: InputDecoration(
+                labelText: 'Prompt',
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                errorText: (promptController.errorMessage.isNotEmpty)
+                    ? promptController.errorMessage
+                    : null,
+                border: const OutlineInputBorder(),
+              ),
+              maxLines: null,
+              minLines: 9,
+              style: const TextStyle(
+                fontSize: 14,
+              ),
+              onChanged: (value) {
+                widget.scenario.setPrompt(value);
+              },
+            )),
+      ],
+    );
   }
 }

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:png_chunks_extract/png_chunks_extract.dart' as png_extract;
 import 'package:flutter/foundation.dart';
+import 'package:xml/xml.dart';
 
 String formatDateTime1(DateTime dateTime) {
   return '${dateTime.year % 100}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.day.toString().padLeft(2, '0')} '
@@ -230,4 +231,17 @@ String sanitizeTagName(String input) {
 bool testXMLTagName(String tag) {
   RegExp tagExp = RegExp(r'^[A-Za-z_][A-Za-z0-9._-]*$');
   return tagExp.hasMatch(tag);
+}
+
+List<String> splitXml(XmlNode node) {
+  final String innerXml = node.innerXml;
+  final String outerXml = node.outerXml;
+  final int start = outerXml.indexOf(innerXml);
+  final int end = start + innerXml.length;
+  final List<String> parts = [
+    outerXml.substring(0, start),
+    outerXml.substring(start, end),
+    outerXml.substring(end)
+  ];
+  return parts;
 }

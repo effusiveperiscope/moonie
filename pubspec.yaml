@@ -35,6 +35,7 @@ dependencies:
   provider: ^6.1.2
   rhttp: ^0.9.1
   window_manager: ^0.4.3
+  xml: ^6.5.0
 
 dev_dependencies:
   flutter_test:
