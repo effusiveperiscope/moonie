@@ -24,6 +24,7 @@ class PromptEditingController extends TextEditingController {
     this.reservedTagStyle,
   }) {
     reservedTags = List.from(se.reservedTags);
+    _parseXML(text);
   }
 
   @override
