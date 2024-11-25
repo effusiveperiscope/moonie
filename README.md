@@ -23,6 +23,34 @@ Mobile-first frontend for messing around with LLMs for roleplay. Other than that
 - A **postprocessor** is any module that operates on the result of the primary AI call (it may be read-only, or it may alter the result of the primary AI call).
 - A **user input module** is a user-interactable module that can make inputs on behalf of the user.
 
+## Prompt XML
+Prompts are in XML and start with a root-level `<prompt>` element, which will be stripped (?) when the actual prompt is sent to the model. (In the scenario editing interface, the `<prompt>` element does not need to be explicitly written out; it will be automatically filled in at prompt time.)
+
+User-specified empty elements can be used, representing a NodeSlot with the associated tag:
+```
+	<character/>
+    <character get="name"/>
+```
+
+Some tags are reserved for the following purposes: 
+* Elements used for control flow
+```
+	<condition nodeFilled="character"></condition>
+	<messages/>
+```
+* Common prompt engineering elements, passed verbatim to the LLM:
+```
+	<instructions></instructions>
+	<formatting></formatting>
+	<example></example>
+	<thinking></thinking>
+```
+* Reserved for future use
+```
+	<random></random>
+	<randomchoice></randomchoice>
+```
+
 # Installation
 - Depends on rust for `rhttp` client (this is to get around a problem with the standard library's cookie handling) [rustup](https://rustup.rs/)
 - 
