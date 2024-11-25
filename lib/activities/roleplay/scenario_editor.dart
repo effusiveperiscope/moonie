@@ -102,7 +102,7 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                                 ButtonSegment(
                                   label: Text('Prompts'),
                                   value: _ScenarioEditorTab.prompts,
-                                )
+                                ),
                               ],
                               selected: selectedTabs,
                               onSelectionChanged: (s) {
@@ -140,7 +140,9 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                   ),
                   const Divider(),
                   if (selectedTabs.contains(_ScenarioEditorTab.slots))
-                    SlotsPage(widget.core, scenario: widget.scenario)
+                    SlotsPage(widget.core, scenario: widget.scenario),
+                  if (selectedTabs.contains(_ScenarioEditorTab.prompts))
+                    PromptPage(widget.scenario, widget.core),
                 ],
               );
             }),
@@ -431,5 +433,52 @@ class FillEditor extends StatelessWidget {
         );
       }),
     );
+  }
+}
+
+class PromptPage extends StatefulWidget {
+  final MoonieCore core;
+  final Scenario scenario;
+  const PromptPage(this.scenario, this.core, {super.key});
+
+  @override
+  State<PromptPage> createState() => _PromptPageState();
+}
+
+class _PromptPageState extends State<PromptPage> {
+  late final TextEditingController promptController;
+
+  @override
+  void initState() {
+    super.initState();
+    promptController = TextEditingController(text: widget.scenario.prompt);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    promptController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextField(
+          controller: promptController,
+          decoration: const InputDecoration(
+            labelText: 'Prompt',
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            border: OutlineInputBorder(),
+          ),
+          maxLines: null,
+          minLines: 9,
+          style: const TextStyle(
+            fontSize: 14,
+          ),
+          onChanged: (value) {
+            widget.scenario.setPrompt(value);
+          },
+        ));
   }
 }

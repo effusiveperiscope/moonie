@@ -208,6 +208,7 @@ class Scenario extends ChangeNotifier {
   String _name = '';
   String? _description;
   String? _imagePath;
+  String _prompt = '';
 
   @Property(type: PropertyType.date)
   DateTime? created;
@@ -218,6 +219,17 @@ class Scenario extends ChangeNotifier {
   void notifyListeners() {
     super.notifyListeners();
     context?.scenarios.put(this);
+  }
+
+  String get prompt => _prompt;
+  set prompt(String value) {
+    _prompt = value;
+  }
+
+  void setPrompt(String value) {
+    prompt = value;
+    modified = DateTime.now();
+    notifyListeners();
   }
 
   String get name => _name;
@@ -313,24 +325,25 @@ class Scenario extends ChangeNotifier {
 
   // Probably make this more sophisticated later
   static const String basePrompt = '''
-You are engaging in an interactive roleplay scenario with the user, {user}. 
+You are engaging in an interactive roleplay scenario with the user, <user>. 
 
-Scenario details:
-- Premise: {premise}
-- Primary characters (key participants): {character}.
-- Character info: {character_content}
-- User info: {user_content}
-- World info: {world_content}
+Primary characters (key participants): 
+<character get="name">.
+Character info: 
+<character>
+User info: 
+<user>
+World info: 
+<world>
 
 Current conversation:
-<messages> 
-{messages}
-</messages>
+<messages>
 
 <instructions>
 - Continue the roleplay naturally, staying in character based on the provided context.
 - Maintain the tone and pacing of the previous messages.
-- Additional rules: {rules_content}
+Additional rules: 
+<rules>
 
 In plaintext, write your next response to progress the roleplay.
 </instructions>

@@ -210,7 +210,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(6, 3437152827243650063),
       name: 'Scenario',
-      lastPropertyId: const obx_int.IdUid(6, 6322375816734078315),
+      lastPropertyId: const obx_int.IdUid(7, 2618949866811402569),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -241,6 +241,11 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(6, 6322375816734078315),
             name: 'imagePath',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 2618949866811402569),
+            name: 'prompt',
             type: 9,
             flags: 0)
       ],
@@ -613,13 +618,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final imagePathOffset = object.imagePath == null
               ? null
               : fbb.writeString(object.imagePath!);
-          fbb.startTable(7);
+          final promptOffset = fbb.writeString(object.prompt);
+          fbb.startTable(8);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.created?.millisecondsSinceEpoch);
           fbb.addInt64(2, object.modified?.millisecondsSinceEpoch);
           fbb.addOffset(3, nameOffset);
           fbb.addOffset(4, descriptionOffset);
           fbb.addOffset(5, imagePathOffset);
+          fbb.addOffset(6, promptOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -643,7 +650,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ..description = const fb.StringReader(asciiOptimization: true)
                 .vTableGetNullable(buffer, rootOffset, 12)
             ..imagePath = const fb.StringReader(asciiOptimization: true)
-                .vTableGetNullable(buffer, rootOffset, 14);
+                .vTableGetNullable(buffer, rootOffset, 14)
+            ..prompt = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 16, '');
           obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.chats, store,
               obx_int.RelInfo<Scenario>.toMany(2, object.id));
           obx_int.InternalToManyAccess.setRelInfo<Scenario>(object.slots, store,
@@ -892,6 +901,10 @@ class Scenario_ {
   /// See [Scenario.imagePath].
   static final imagePath =
       obx.QueryStringProperty<Scenario>(_entities[4].properties[5]);
+
+  /// See [Scenario.prompt].
+  static final prompt =
+      obx.QueryStringProperty<Scenario>(_entities[4].properties[6]);
 
   /// see [Scenario.chats]
   static final chats =
