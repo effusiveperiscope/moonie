@@ -33,6 +33,7 @@ class _ScenarioBrowserState extends State<ScenarioBrowser> {
       context: context,
       builder: (BuildContext context) {
         String scenarioName = '', scenarioDescription = '';
+        bool doDefaults = true;
         return AlertDialog(
           title: const Text('Add scenario'),
           content: Column(
@@ -54,7 +55,16 @@ class _ScenarioBrowserState extends State<ScenarioBrowser> {
                 onChanged: (value) {
                   scenarioDescription = value;
                 },
-              )
+              ),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                  value: doDefaults,
+                  onChanged: (value) {
+                    setState(() {
+                      doDefaults = value!;
+                    });
+                  },
+                  title: const Text('Provide default slots/prompt/greeting'))
             ],
           ),
           actions: <Widget>[
@@ -67,11 +77,14 @@ class _ScenarioBrowserState extends State<ScenarioBrowser> {
             TextButton(
               child: const Text('Add'),
               onPressed: () {
-                core.rpContext.createScenario(
+                final s = core.rpContext.createScenario(
                   scenarioName,
                   description: scenarioDescription,
                 );
                 Navigator.of(context).pop();
+                if (doDefaults) {
+                  s.doDefaults();
+                }
               },
             ),
           ],
@@ -239,7 +252,7 @@ class ScenarioDisplayWidget extends StatelessWidget {
                         style: const TextStyle(fontSize: 10),
                       ),
                       Text(
-                        'Modified: ${formatDateTime1(scenario.modified!)}',
+                        'Modified: ${formatDateTime1(scenario.modified != null ? scenario.modified! : scenario.created!)}',
                         style: const TextStyle(fontSize: 10),
                       ),
                     ],

@@ -381,6 +381,17 @@ class Scenario extends ChangeNotifier {
     context!.chatMessages.remove(mes.id);
   }
 
+  // This assumes that the scenario is a new one with nothing in it
+  void doDefaults() {
+    createSlot('character', BaseRole.character);
+    createSlot('user', BaseRole.user);
+    createSlot('world', BaseRole.world);
+    createSlot('rules', BaseRole.writingRules);
+    prompt = basePrompt;
+    final mes = createGreeting();
+    mes.text = 'Hi there! Let\'s get started.';
+  }
+
   // Probably make this more sophisticated later
   static const String basePrompt = '''
 You are engaging in an interactive roleplay scenario with the user, <user/>. 

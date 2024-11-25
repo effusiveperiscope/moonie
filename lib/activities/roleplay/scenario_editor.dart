@@ -80,7 +80,7 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                                 "Created: ${formatDateTime1(widget.scenario.created!)}"),
                             const SizedBox(height: 8),
                             Text(
-                                "Modified: ${formatDateTime1(widget.scenario.modified!)}"),
+                                "Modified: ${formatDateTime1(widget.scenario.modified != null ? widget.scenario.modified! : widget.scenario.created!)}"),
                             const SizedBox(height: 16),
                             TextField(
                               maxLines: 5,
