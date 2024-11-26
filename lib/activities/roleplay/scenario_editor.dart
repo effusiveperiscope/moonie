@@ -110,6 +110,10 @@ class _ScenarioEditorState extends State<ScenarioEditor> {
                                     value: _ScenarioEditorTab.greetings,
                                     label: Text('Greetings')),
                               ],
+                              style: const ButtonStyle(
+                                  textStyle: WidgetStatePropertyAll(
+                                TextStyle(fontSize: 12),
+                              )),
                               selected: selectedTabs,
                               onSelectionChanged: (s) {
                                 setState(() {
@@ -592,8 +596,7 @@ class _GreetingWidgetState extends State<GreetingWidget> {
                   ),
                   const SizedBox(width: 8),
                   ActionChip(
-                      label: const Text("Delete"),
-                      avatar: const Icon(Icons.delete),
+                      label: const Icon(Icons.delete, size: 20),
                       onPressed: () {
                         deleteGreetingDialog(context);
                       }),
