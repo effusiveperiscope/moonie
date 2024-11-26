@@ -55,7 +55,7 @@ Some tags are reserved for the following purposes:
 Here is an example of a fully formed prompt:
 ```xml
 <prompt>
-You are engaging in an interactive roleplay scenario with the user, <user/>. 
+You are engaging in an interactive roleplay scenario with the user, <user get="name"/>. 
 
 Primary characters (key participants): 
 <character get="name"/>.

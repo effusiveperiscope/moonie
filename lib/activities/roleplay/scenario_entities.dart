@@ -394,7 +394,7 @@ class Scenario extends ChangeNotifier {
 
   // Probably make this more sophisticated later
   static const String basePrompt = '''
-You are engaging in an interactive roleplay scenario with the user, <user/>. 
+You are engaging in an interactive roleplay scenario with the user, <user get="name"/>. 
 
 Primary characters (key participants): 
 <character get="name"/>.
