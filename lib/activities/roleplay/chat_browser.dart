@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:moonie/activities/commons.dart';
+import 'package:moonie/activities/roleplay/chat_edit.dart';
 import 'package:moonie/activities/roleplay/chat_entities.dart';
 import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/core.dart';
@@ -115,6 +116,14 @@ class ChatDisplayWidget extends StatelessWidget {
             const Spacer(),
             IconButton.outlined(
               visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.copy),
+              onPressed: () {
+                throw UnimplementedError();
+              },
+            ),
+            const SizedBox(width: 8),
+            IconButton.outlined(
+              visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.chat),
               onPressed: () {
                 throw UnimplementedError();
@@ -125,7 +134,8 @@ class ChatDisplayWidget extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               icon: const Icon(Icons.edit),
               onPressed: () {
-                throw UnimplementedError();
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ChatEdit(core, chat, scenario)));
               },
             ),
             const SizedBox(width: 8),

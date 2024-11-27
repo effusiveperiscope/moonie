@@ -87,34 +87,25 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (!widget.dialogMode)
-                  ActionChip(
-                    avatar: const Icon(Icons.add),
-                    label: const Text("Node"),
-                    onPressed: () {
-                      addNodeDialog(widget.core);
-                    },
-                  ),
+                ActionChip(
+                  avatar: const Icon(Icons.add),
+                  label: const Text("Node"),
+                  onPressed: () {
+                    addNodeDialog(widget.core);
+                  },
+                ),
+                if (widget.dialogMode) const SizedBox(width: 8),
                 if (widget.dialogMode)
                   ActionChip(
                     avatar: const Icon(Icons.clear),
-                    label: const Text("Clear selection"),
+                    label: const Text("Clear"),
                     onPressed: () {
                       widget.nodeSelectController?.clear();
                     },
                   ),
                 const SizedBox(width: 8),
-                // ActionChip(
-                // label: const Icon(Icons.delete, size: 20),
-                // onPressed: () {},
-                // ),
-                const SizedBox(width: 8),
-                // ActionChip(
-                //   label: const Icon(Icons.sort, size: 20),
-                //   onPressed: () {},
-                // ),
                 SizedBox(
-                  width: 130,
+                  width: 100,
                   child: DropdownMenu(
                     dropdownMenuEntries: const [
                       DropdownMenuEntry(
@@ -149,7 +140,7 @@ class _KnowledgeBrowserState extends State<KnowledgeBrowser> {
                 const SizedBox(width: 8),
                 if (widget.lockedPage == null)
                   DropdownMenu(
-                    width: 130,
+                    width: 100,
                     requestFocusOnTap: false,
                     dropdownMenuEntries: [
                       for (final e in baseRoleNames.entries)
@@ -360,7 +351,7 @@ class _KnowledgePageState extends State<KnowledgePage> {
                             ),
                           ),
                           const Spacer(),
-                          if (!widget.dialogMode) ...[
+                          if (true) ...[
                             IconButton.outlined(
                               onPressed: () {
                                 Navigator.of(context).push(MaterialPageRoute(
@@ -424,7 +415,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
                             ),
                           ],
                           if (widget.dialogMode &&
-                              widget.nodeSelectController != null)
+                              widget.nodeSelectController != null) ...[
+                            const SizedBox(width: 8),
                             ChangeNotifierProvider.value(
                               value: widget.nodeSelectController,
                               child: Consumer<NodeSelectController>(
@@ -440,7 +432,8 @@ class _KnowledgePageState extends State<KnowledgePage> {
                                   },
                                 );
                               }),
-                            ),
+                            )
+                          ],
                           const SizedBox(width: 16),
                           CircleAvatar(
                             radius: 16,
