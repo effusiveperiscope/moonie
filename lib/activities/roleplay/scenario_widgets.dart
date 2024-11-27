@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fw;
 import 'package:moonie/activities/commons.dart';
+import 'package:moonie/activities/roleplay/chat_browser.dart';
 import 'package:moonie/activities/roleplay/scenario_editor.dart';
 import 'package:moonie/activities/roleplay/scenario_entities.dart';
 import 'package:moonie/core.dart';
@@ -261,7 +262,11 @@ class ScenarioDisplayWidget extends StatelessWidget {
                 const Spacer(),
                 IconButton.outlined(
                   onPressed: () {
-                    throw UnimplementedError();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ChatBrowser(
+                              core,
+                              scenario,
+                            )));
                   },
                   icon: const Icon(Icons.chat),
                   visualDensity: VisualDensity.compact,

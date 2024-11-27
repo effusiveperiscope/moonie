@@ -18,6 +18,7 @@ class RPChat extends ChangeNotifier {
 
   @Property(type: PropertyType.date)
   DateTime? created;
+  DateTime? modified;
 
   @override
   void notifyListeners() {
@@ -35,6 +36,7 @@ class RPChat extends ChangeNotifier {
     fill.nodes.addAll(nodes ?? []);
     fill.content = content;
     fill.context = context!;
+    modified = DateTime.now();
     context!.slotFills.put(fill);
     return fill;
   }
@@ -54,12 +56,14 @@ class RPChat extends ChangeNotifier {
     mes.model = model;
     mes.context = context!;
     mes.id = context!.chatMessages.put(mes);
+    modified = DateTime.now();
     notifyListeners();
     return mes;
   }
 
   void deleteMessage(RPChatMessage mes) {
     messages.remove(mes);
+    modified = DateTime.now();
     notifyListeners();
     context!.chatMessages.remove(mes.id);
   }

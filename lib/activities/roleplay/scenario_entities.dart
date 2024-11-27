@@ -348,6 +348,12 @@ class Scenario extends ChangeNotifier {
     return chat;
   }
 
+  void removeChat(RPChat chat) {
+    chats.remove(chat);
+    notifyListeners();
+    context!.chats.remove(chat.id);
+  }
+
   Scenario copy() {
     final scenario = Scenario();
     scenario.name = name;
